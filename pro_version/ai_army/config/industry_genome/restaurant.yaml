@@ -1,0 +1,280 @@
+# 餐饮行业基因库
+id: restaurant
+name: 餐饮店
+icon: "🍽️"
+description: "中餐、火锅、烧烤、小吃、饮品、烘焙等"
+subcategories:
+  - 中餐正餐
+  - 火锅/串串
+  - 烧烤烤肉
+  - 小吃快餐
+  - 面馆/粉店
+  - 咖啡茶饮
+  - 烘焙面包
+  - 甜品糖水
+  - 日韩料理
+  - 东南亚菜
+  - 西餐牛排
+  - 自助餐
+  - 轻食沙拉
+  - 早餐店
+  - 卤味熟食
+  - 外卖专营店
+  - 私房菜
+  - 食堂/团餐
+
+default_search_radius: 1000
+
+# POI 搜索类型码（用于高德/腾讯精准商家搜索）
+amap_poi_type: "050000"       # 高德：餐饮服务
+tencent_poi_type: "美食"       # 腾讯：美食
+
+kpi_formulas:
+  日营收:
+    formula: "sum(当日所有订单收入)"
+    description: "今天一天总共卖了多少钱"
+    unit: 元
+    importance: critical
+    is_raw: true
+  客单价:
+    formula: "日营收 / 订单数"
+    description: "每个客人平均消费多少钱"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 订单数
+        question: "今天总共有多少个订单？"
+        placeholder: "比如：50"
+        unit: 单
+    compute_expr: "日营收 / 订单数"
+  翻台率:
+    formula: "总服务批数 / 总桌数"
+    description: "每张桌子一天能接待几批客人"
+    unit: 次/天
+    importance: high
+    raw_inputs:
+      - key: 总桌数
+        question: "店里一共有几张桌子？"
+        placeholder: "比如：10"
+        unit: 张
+      - key: 总批次数
+        question: "今天总共来了几批客人？"
+        placeholder: "比如：25"
+        unit: 批
+    compute_expr: "总批次数 / 总桌数"
+  食材成本率:
+    formula: "食材成本 / 营收 * 100"
+    description: "食材花了多少钱？占总收入多少"
+    unit: "%"
+    importance: critical
+    raw_inputs:
+      - key: 食材成本
+        question: "今天买菜进货花了多少钱？"
+        placeholder: "比如：1200"
+        unit: 元
+    compute_expr: "食材成本 / 日营收 * 100"
+  人效:
+    formula: "营收 / 员工总数"
+    description: "每个员工平均带来多少收入"
+    unit: 元/人
+    importance: high
+    raw_inputs:
+      - key: 员工人数
+        question: "店里一共几个员工（包括厨师、服务员）？"
+        placeholder: "比如：5"
+        unit: 人
+    compute_expr: "日营收 / 员工人数"
+  线上评分:
+    formula: "大众点评/美团综合评分"
+    description: "美团/大众点评上的客人评分"
+    unit: 分
+    importance: high
+    is_raw: true
+  复购率:
+    formula: "回头客数 / 总顾客数 * 100"
+    description: "回头客占总客人的比例"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 总顾客数
+        question: "今天一共来了多少客人？"
+        placeholder: "比如：100"
+        unit: 人
+      - key: 回头客数
+        question: "这里面大概有多少是熟客/回头客？"
+        placeholder: "比如：30"
+        unit: 人
+    compute_expr: "回头客数 / 总顾客数 * 100"
+  外卖占比:
+    formula: "外卖营收 / 总营收 * 100"
+    description: "外卖收入占总收入的比例"
+    unit: "%"
+    importance: medium
+    raw_inputs:
+      - key: 外卖营收
+        question: "今天外卖平台（美团/饿了么）卖了多少钱？"
+        placeholder: "比如：1200"
+        unit: 元
+    compute_expr: "外卖营收 / 日营收 * 100"
+  高峰排队时长:
+    formula: "高峰时段平均排队等待分钟数"
+    description: "饭点客人平均需要等多久"
+    unit: 分钟
+    importance: medium
+    is_raw: true
+  差评回复率:
+    formula: "24h内回复差评数 / 总差评数 * 100"
+    description: "差评有没有及时回复"
+    unit: "%"
+    importance: medium
+    raw_inputs:
+      - key: 总差评数
+        question: "最近收到了几条差评？"
+        placeholder: "比如：10"
+        unit: 条
+      - key: 已回复差评
+        question: "其中及时回复了几条？"
+        placeholder: "比如：9"
+        unit: 条
+    compute_expr: "已回复差评 / 总差评数 * 100"
+
+benchmarks:
+  客单价:
+    economy: 20
+    mid: 50
+    premium: 150
+  翻台率:
+    excellent: 5.0
+    good: 3.0
+    average: 2.0
+    poor: 1.0
+  食材成本率:
+    excellent: 28
+    good: 33
+    average: 38
+    poor: 42
+  人效:
+    excellent: 800
+    good: 500
+    average: 300
+    poor: 200
+  线上评分:
+    excellent: 4.8
+    good: 4.3
+    average: 3.8
+    poor: 3.5
+  复购率:
+    excellent: 50
+    good: 35
+    average: 20
+    poor: 10
+  外卖占比:
+    excellent: 40
+    good: 30
+    average: 20
+    poor: 15
+
+red_flags:
+  - metric: 食材成本率
+    threshold: "> 42"
+    severity: critical
+    description: "食材成本失控，超过42%将严重侵蚀利润"
+  - metric: 翻台率
+    threshold: "< 1.5"
+    severity: critical
+    description: "翻台率过低，存在严重的坪效浪费"
+  - metric: 线上评分
+    threshold: "< 3.5"
+    severity: high
+    description: "评分低于3.5分将显著影响新客到店"
+  - metric: 复购率
+    threshold: "< 15"
+    severity: high
+    description: "复购率低说明顾客满意度下降或缺乏粘性机制"
+  - metric: 人效
+    threshold: "< 200"
+    severity: high
+    description: "人效过低，可能存在过度用工或排班不合理"
+  - metric: 客单价
+    threshold: "较上月降幅 > 15%"
+    severity: medium
+    description: "客单价持续下降可能反映高价值顾客流失"
+
+competitor_focus:
+  - "周边1km同品类餐厅"
+  - "外卖平台同品类TOP10排名变化"
+  - "新开餐饮店铺及装修升级"
+  - "竞品促销活动及优惠力度"
+  - "顾客差评关键词变化趋势"
+  - "竞品菜单价格变动"
+  - "网红/打卡店铺动态"
+
+marketing_scenarios:
+  - name: "新菜推荐"
+    icon: "🆕"
+    desc: "新品上市推广文案+海报"
+  - name: "节日套餐"
+    icon: "🎉"
+    desc: "节日限定套餐营销内容"
+  - name: "会员日"
+    icon: "👑"
+    desc: "会员专属优惠活动"
+  - name: "好评引导"
+    icon: "⭐"
+    desc: "引导顾客写好评的话术"
+  - name: "外卖优化"
+    icon: "🛵"
+    desc: "外卖平台商品描述优化"
+  - name: "私域引流"
+    icon: "💬"
+    desc: "引导顾客加微信/微信群"
+  - name: "抖音/小红书种草"
+    icon: "📱"
+    desc: "短视频探店内容策划"
+  - name: "午市/晚市套餐"
+    icon: "☀️"
+    desc: "分时段套餐推广"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行诊断分析：
+
+    ## 行业基准（{store_type}）
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+    ## 分析规则
+    1. 所有指标必须与行业基准对比，使用"您的XX为{value}，{comparison}行业均值{benchmark}"
+    2. 对异常指标进行根因分析（不是描述现象，而是找出为什么）
+    3. 归因颗粒度：必须到"时段/品类/人员"级别，禁止笼统归因
+    4. 建议必须可量化（如"调整午市套餐定价+10元，预计客单价提升8-12元"）
+    5. 按经营紧急度排序，最紧急的问题放在最前面
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请对以下经营数据进行因果归因分析：
+
+    ## 分析框架
+    1. **现象识别**：哪些指标出现异常？
+    2. **因果链**：指标之间的因果传导路径是什么？（如：差评增加 → 评分下降 → 到店客流减少 → 营收下滑）
+    3. **根因定位**：追溯到最根本的原因（是产品问题？运营问题？市场问题？还是管理问题？）
+    4. **影响量化**：估算每个根因对营收/利润的影响金额
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+    ## 数据
+    {data_context}
+
+faq_templates:
+  - "你们家的招牌菜是什么？"
+  - "可以提前订位吗？"
+  - "有什么优惠活动？"
+  - "可以打包/外卖吗？"
+  - "有包厢吗？能容纳多少人？"
+  - "营业时间是？"
+  - "有停车位吗？"
+  - "适合聚餐吗？人均多少？"

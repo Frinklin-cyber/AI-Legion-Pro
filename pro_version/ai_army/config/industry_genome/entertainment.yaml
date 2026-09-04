@@ -1,0 +1,202 @@
+# 娱乐休闲行业基因库
+id: entertainment
+name: 娱乐休闲
+icon: "🎮"
+description: "KTV、影院、密室逃脱、棋牌、剧本杀、网咖等"
+subcategories:
+  - KTV/量贩KTV
+  - 电影院
+  - 密室逃脱/剧本杀
+  - 棋牌室/麻将馆
+  - 电竞馆/网咖
+  - 台球/保龄球
+  - livehouse/酒吧
+  - 儿童游乐
+
+default_search_radius: 3000
+
+amap_poi_type: "080000"
+tencent_poi_type: "娱乐休闲"
+
+kpi_formulas:
+  日营收:
+    formula: "sum(当日所有消费收入)"
+    description: "今天一天总共收了多少钱"
+    unit: 元
+    importance: critical
+    is_raw: true
+  客单价:
+    formula: "日营收 / 消费人次"
+    description: "每个客人平均消费多少钱"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 消费人次
+        question: "今天一共有多少人来消费了？"
+        placeholder: "比如：50"
+        unit: 人
+    compute_expr: "日营收 / 消费人次"
+  上座率:
+    formula: "使用中包间/座位 / 总包间/座位 * 100"
+    description: "10个包厢/座位里有多少被用了"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 总包间数
+        question: "一共有多少个包间/座位？"
+        placeholder: "比如：20"
+        unit: 个
+      - key: 使用中包间数
+        question: "今天平均有多少个在使用？"
+        placeholder: "比如：14"
+        unit: 个
+    compute_expr: "使用中包间数 / 总包间数 * 100"
+  翻台率:
+    formula: "每包间每天使用次数"
+    description: "每个包间每天被用几次"
+    unit: 次/天
+    importance: high
+    raw_inputs:
+      - key: 总使用次数
+        question: "今天所有包间一共被用了多少次？"
+        placeholder: "比如：50"
+        unit: 次
+      - key: 包间数量
+        question: "一共有多少个包间？"
+        placeholder: "比如：20"
+        unit: 个
+    compute_expr: "总使用次数 / 包间数量"
+  酒水餐饮占比:
+    formula: "酒水餐饮收入 / 总营收 * 100"
+    description: "酒水小吃收入占多少"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 酒水餐饮收入
+        question: "今天酒水、小吃、餐饮一共卖了多少钱？"
+        placeholder: "比如：1500"
+        unit: 元
+    compute_expr: "酒水餐饮收入 / 日营收 * 100"
+  线上预订率:
+    formula: "线上渠道预订 / 总预订 * 100"
+    description: "有多少客人是线上预订的"
+    unit: "%"
+    importance: medium
+    raw_inputs:
+      - key: 线上预订数
+        question: "通过美团/点评等线上平台预订了多少？"
+        placeholder: "比如：18"
+        unit: 单
+      - key: 总预订数
+        question: "今天一共多少预订？"
+        placeholder: "比如：30"
+        unit: 单
+    compute_expr: "线上预订数 / 总预订数 * 100"
+  会员复购率:
+    formula: "回头会员 / 总会籍会员 * 100"
+    description: "会员里有多少回头来了"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 总会籍数
+        question: "一共有多少会员？"
+        placeholder: "比如：300"
+        unit: 人
+      - key: 回头会员数
+        question: "其中经常来消费的有多少人？"
+        placeholder: "比如：120"
+        unit: 人
+    compute_expr: "回头会员数 / 总会籍数 * 100"
+  好评率:
+    formula: "各平台综合评价分"
+    description: "10个客人里有多少个给好评"
+    unit: "%"
+    importance: high
+    is_raw: true
+
+benchmarks:
+  上座率:
+    excellent: 75
+    good: 55
+    average: 40
+    poor: 25
+  翻台率:
+    excellent: 3.5
+    good: 2.5
+    average: 1.5
+    poor: 0.8
+  酒水餐饮占比:
+    excellent: 40
+    good: 30
+    average: 20
+    poor: 10
+  会员复购率:
+    excellent: 55
+    good: 40
+    average: 25
+    poor: 12
+
+red_flags:
+  - metric: 上座率
+    threshold: "< 25"
+    severity: critical
+    description: "上座率过低，设备和空间严重浪费"
+  - metric: 会员复购率
+    threshold: "< 12"
+    severity: high
+    description: "复购率低说明体验差或缺乏会员粘性"
+  - metric: 酒水餐饮占比
+    threshold: "< 10"
+    severity: medium
+    description: "酒水餐饮占比低意味着二次消费转化不足"
+
+competitor_focus:
+  - "周边3km同类娱乐场所"
+  - "团购平台价格对比"
+  - "竞品设备/装修升级"
+  - "新开业娱乐场所"
+  - "竞品主题活动与促销"
+  - "顾客评价与口碑"
+
+marketing_scenarios:
+  - name: "聚会套餐"
+    icon: "🎉"
+    desc: "生日/团建聚会方案"
+  - name: "工作日优惠"
+    icon: "📅"
+    desc: "非高峰时段促销活动"
+  - name: "新客体验"
+    icon: "🎫"
+    desc: "首次体验特惠"
+  - name: "会员日"
+    icon: "👑"
+    desc: "会员专属折扣日"
+  - name: "主题活动"
+    icon: "🎭"
+    desc: "节日/主题派对策划"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行分析诊断。所有指标需与行业基准对比。
+
+    ## 行业基准
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请基于因果框架分析根因，追溯到时段定价/设备/服务/会员体系维度。
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "怎么收费？按小时还是按人？"
+  - "需要提前预订吗？"
+  - "最多能容纳多少人？"
+  - "可以带酒水吗？"
+  - "营业时间是？"
+  - "有什么优惠活动？"

@@ -1,0 +1,197 @@
+# 鲜花礼品行业基因库
+id: florist
+name: 鲜花礼品
+icon: "💐"
+description: "花店、绿植、礼品店、手工DIY等"
+subcategories:
+  - 鲜花零售
+  - 花艺设计/婚庆
+  - 绿植盆栽
+  - 礼品定制
+  - 手工DIY工作室
+
+default_search_radius: 1500
+
+amap_poi_type: "060900"
+tencent_poi_type: "购物"
+
+kpi_formulas:
+  日营收:
+    formula: "sum(当日所有销售收入)"
+    description: "今天一天总共卖了多少钱"
+    unit: 元
+    importance: critical
+    is_raw: true
+  客单价:
+    formula: "日营收 / 订单数"
+    description: "每个订单平均多少钱"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 订单数
+        question: "今天总共有多少个订单？"
+        placeholder: "比如：30"
+        unit: 单
+    compute_expr: "日营收 / 订单数"
+  节日峰值倍数:
+    formula: "节日营收 / 平日平均营收"
+    description: "节日营业额是平时的几倍"
+    unit: 倍
+    importance: high
+    raw_inputs:
+      - key: 节日营收
+        question: "最近一个节日当天卖了多少钱？"
+        placeholder: "比如：9000"
+        unit: 元
+      - key: 平日营收
+        question: "平时一天大概卖多少钱？"
+        placeholder: "比如：3000"
+        unit: 元
+    compute_expr: "节日营收 / 平日营收"
+  线上订单占比:
+    formula: "外卖/线上渠道订单 / 总订单 * 100"
+    description: "线上订单占总订单的比例"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 线上订单数
+        question: "线上（外卖/小程序）来了多少订单？"
+        placeholder: "比如：18"
+        unit: 单
+      - key: 总订单数
+        question: "今天一共多少订单？"
+        placeholder: "比如：30"
+        unit: 单
+    compute_expr: "线上订单数 / 总订单数 * 100"
+  损耗率:
+    formula: "损耗金额 / 总进货金额 * 100"
+    description: "进货的花里，有多少损耗了"
+    unit: "%"
+    importance: critical
+    raw_inputs:
+      - key: 进货总金额
+        question: "这段时间进货一共花了多少钱？"
+        placeholder: "比如：5000"
+        unit: 元
+      - key: 损耗金额
+        question: "其中损耗（枯死、损坏）的大概值多少钱？"
+        placeholder: "比如：500"
+        unit: 元
+    compute_expr: "损耗金额 / 进货总金额 * 100"
+  会员复购率:
+    formula: "回头会员 / 总会员 * 100"
+    description: "会员里有多少回头买了"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 总会籍数
+        question: "一共有多少会员？"
+        placeholder: "比如：200"
+        unit: 人
+      - key: 回头会员数
+        question: "其中有多少人买过两次以上？"
+        placeholder: "比如：80"
+        unit: 人
+    compute_expr: "回头会员数 / 总会籍数 * 100"
+  好评率:
+    formula: "平台综合评分"
+    description: "客人好评占总评价的比例"
+    unit: "%"
+    importance: high
+    is_raw: true
+  人均产出:
+    formula: "营收 / 花艺师人数"
+    description: "每个花艺师平均做多少业绩"
+    unit: 元/人
+    importance: medium
+    raw_inputs:
+      - key: 花艺师人数
+        question: "一共有几位花艺师？"
+        placeholder: "比如：3"
+        unit: 人
+    compute_expr: "日营收 / 花艺师人数"
+
+benchmarks:
+  节日峰值倍数:
+    excellent: 5
+    good: 3
+    average: 2
+    poor: 1.2
+  损耗率:
+    excellent: 5
+    good: 10
+    average: 15
+    poor: 22
+  线上订单占比:
+    excellent: 50
+    good: 35
+    average: 20
+    poor: 8
+  人均产出:
+    excellent: 600
+    good: 400
+    average: 250
+    poor: 150
+
+red_flags:
+  - metric: 损耗率
+    threshold: "> 22"
+    severity: critical
+    description: "损耗率过高直接侵蚀利润，需要检查采购和库存管理"
+  - metric: 节日峰值倍数
+    threshold: "< 1.2"
+    severity: high
+    description: "节日营销效果差，错失最大营收窗口"
+  - metric: 线上订单占比
+    threshold: "< 8"
+    severity: medium
+    description: "线上渠道薄弱，在竞争中被外卖平台流量抛弃"
+
+competitor_focus:
+  - "周边1.5km花店/礼品店"
+  - "外卖平台花店排名"
+  - "竞品价格与款式对比"
+  - "节日/热点时期竞品动态"
+  - "新开业花店"
+
+marketing_scenarios:
+  - name: "节日花束"
+    icon: "🎁"
+    desc: "节日限定花束推广"
+  - name: "日常鲜花订阅"
+    icon: "📅"
+    desc: "每周一花订阅方案"
+  - name: "开业花篮"
+    icon: "🎊"
+    desc: "企业开业花篮方案"
+  - name: "花艺课程"
+    icon: "🎓"
+    desc: "花艺体验课内容"
+  - name: "朋友圈种草"
+    icon: "📱"
+    desc: "花束美图+文案"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行分析诊断。所有指标需与行业基准对比。
+
+    ## 行业基准
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请基于因果框架分析根因，追溯到损耗管理/节日备货/线上运营维度。
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "一束花大概多少钱？"
+  - "可以定制花束吗？"
+  - "可以配送到家吗？"
+  - "鲜花能放多久？"
+  - "有什么推荐的吗？"

@@ -1,0 +1,12 @@
+{
+  "wecom": {
+    "url": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=在此粘贴企业微信机器人key"
+  },
+  "dingtalk": {
+    "url": "https://oapi.dingtalk.com/robot/send?access_token=在此粘贴钉钉机器人access_token",
+    "secret": "可选：启用加签时填写钉钉机器人密钥"
+  },
+  "feishu": {
+    "url": "https://open.feishu.cn/open-apis/bot/v2/hook/在此粘贴飞书机器人webhook"
+  }
+}

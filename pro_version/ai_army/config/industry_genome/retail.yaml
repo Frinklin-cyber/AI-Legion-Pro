@@ -1,0 +1,266 @@
+# 零售行业基因库
+id: retail
+name: 零售店
+icon: "🏪"
+description: "便利店、服装、美妆、数码、超市、母婴等"
+subcategories:
+  - 便利店/小超市
+  - 服装服饰
+  - 鞋帽箱包
+  - 美妆护肤
+  - 数码电子
+  - 综合超市
+  - 母婴用品
+  - 家居建材
+  - 珠宝饰品
+  - 文具办公
+  - 运动户外
+  - 农贸/生鲜
+
+default_search_radius: 1500
+
+amap_poi_type: "060000"
+tencent_poi_type: "购物"
+
+kpi_formulas:
+  日营收:
+    formula: "sum(当日所有交易收入)"
+    description: "今天一天总共卖了多少钱"
+    unit: 元
+    importance: critical
+    is_raw: true
+  客单价:
+    formula: "日营收 / 交易笔数"
+    description: "每个顾客平均买多少钱的东西"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 交易笔数
+        question: "今天一共成交了多少笔？"
+        placeholder: "比如：40"
+        unit: 笔
+    compute_expr: "日营收 / 交易笔数"
+  连带率:
+    formula: "售出商品总件数 / 交易笔数"
+    description: "每个顾客平均买几件商品"
+    unit: 件
+    importance: high
+    raw_inputs:
+      - key: 售出总件数
+        question: "今天一共卖出了多少件商品？"
+        placeholder: "比如：100"
+        unit: 件
+      - key: 交易笔数2
+        question: "今天一共成交了多少笔？"
+        placeholder: "比如：40"
+        unit: 笔
+    compute_expr: "售出总件数 / 交易笔数2"
+  库存周转天数:
+    formula: "平均库存金额 / 日均销售成本"
+    description: "库存卖完一轮需要多少天"
+    unit: 天
+    importance: high
+    raw_inputs:
+      - key: 库存总金额
+        question: "目前仓库里的货值多少钱（进货价）？"
+        placeholder: "比如：50000"
+        unit: 元
+      - key: 每天销售成本
+        question: "平均每天卖掉的货成本是多少？"
+        placeholder: "比如：2000"
+        unit: 元
+    compute_expr: "库存总金额 / 每天销售成本"
+  坪效:
+    formula: "营收 / 营业面积(㎡)"
+    description: "每平米店铺能赚多少钱"
+    unit: 元/㎡
+    importance: high
+    raw_inputs:
+      - key: 营业面积
+        question: "店铺面积有多大？（平方米）"
+        placeholder: "比如：50"
+        unit: ㎡
+    compute_expr: "日营收 / 营业面积"
+  进店转化率:
+    formula: "成交客数 / 进店客数 * 100"
+    description: "10个进店的客人里，有多少个买了东西"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 进店人数
+        question: "今天大概有多少人走进店里？"
+        placeholder: "比如：120"
+        unit: 人
+      - key: 成交人数
+        question: "其中多少人买了东西？"
+        placeholder: "比如：30"
+        unit: 人
+    compute_expr: "成交人数 / 进店人数 * 100"
+  会员消费占比:
+    formula: "会员消费金额 / 总营收 * 100"
+    description: "会员消费占总收入的比例"
+    unit: "%"
+    importance: medium
+    raw_inputs:
+      - key: 会员消费金额
+        question: "今天会员卡/会员账户消费了多少钱？"
+        placeholder: "比如：2000"
+        unit: 元
+    compute_expr: "会员消费金额 / 日营收 * 100"
+  退货率:
+    formula: "退货金额 / 总营收 * 100"
+    description: "卖出去的货里，有多少被退回来了"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 退货金额
+        question: "今天被退货的商品总共多少钱？"
+        placeholder: "比如：150"
+        unit: 元
+    compute_expr: "退货金额 / 日营收 * 100"
+  毛利率:
+    formula: "(营收 - 成本) / 营收 * 100"
+    description: "卖100块钱，有多少是真正的利润"
+    unit: "%"
+    importance: critical
+    raw_inputs:
+      - key: 总成本
+        question: "今天卖出的这些货，进货成本一共是多少？"
+        placeholder: "比如：2000"
+        unit: 元
+    compute_expr: "(日营收 - 总成本) / 日营收 * 100"
+  到店客流:
+    formula: "每日进店人数"
+    description: "每天有多少人走进店里"
+    unit: 人次
+    importance: high
+    is_raw: true
+
+benchmarks:
+  客单价:
+    economy: 30
+    mid: 80
+    premium: 200
+  连带率:
+    excellent: 3.5
+    good: 2.5
+    average: 1.5
+    poor: 1.0
+  库存周转天数:
+    excellent: 15
+    good: 30
+    average: 45
+    poor: 60
+  坪效:
+    excellent: 2000
+    good: 1200
+    average: 800
+    poor: 400
+  进店转化率:
+    excellent: 35
+    good: 25
+    average: 15
+    poor: 8
+  退货率:
+    excellent: 1
+    good: 3
+    average: 5
+    poor: 8
+  毛利率:
+    excellent: 55
+    good: 45
+    average: 35
+    poor: 25
+
+red_flags:
+  - metric: 库存周转天数
+    threshold: "> 60"
+    severity: critical
+    description: "库存积压严重，资金占用过高"
+  - metric: 毛利率
+    threshold: "< 25"
+    severity: critical
+    description: "毛利率过低，需要检查定价或供应链"
+  - metric: 退货率
+    threshold: "> 8"
+    severity: high
+    description: "退货率高说明商品质量或顾客预期管理有问题"
+  - metric: 进店转化率
+    threshold: "< 8"
+    severity: high
+    description: "转化率低意味着店内体验或导购能力不足"
+  - metric: 坪效
+    threshold: "< 400"
+    severity: high
+    description: "坪效低说明空间利用率或选品有问题"
+
+competitor_focus:
+  - "周边同品类零售店价格对比"
+  - "线上同品类价格监控（京东/淘宝/拼多多）"
+  - "竞品促销活动跟踪"
+  - "新品牌/新店入驻"
+  - "爆品变化趋势及品类动向"
+  - "商圈人流变化对零售的影响"
+
+marketing_scenarios:
+  - name: "新品推荐"
+    icon: "🆕"
+    desc: "新品上架推广图文"
+  - name: "限时促销"
+    icon: "⏰"
+    desc: "限时折扣活动文案"
+  - name: "搭配推荐"
+    icon: "🎯"
+    desc: "商品搭配种草内容"
+  - name: "会员专属"
+    icon: "👑"
+    desc: "会员专享优惠通知"
+  - name: "清仓甩卖"
+    icon: "🏷️"
+    desc: "季末/清仓促销方案"
+  - name: "私域运营"
+    icon: "📱"
+    desc: "社群/朋友圈营销内容"
+  - name: "直播间脚本"
+    icon: "🎬"
+    desc: "直播带货话术脚本"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行诊断分析：
+
+    ## 行业基准（{store_type}）
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+    ## 分析规则
+    1. 所有指标必须与行业基准对比
+    2. 重点关注库存周转、坪效、连带率三大核心指标
+    3. 归因到具体品类/时段/区域
+    4. 建议必须可量化（如"优化A品类陈列位，预计带动连带率提升0.3-0.5件"）
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请对以下零售经营数据进行因果归因分析：
+
+    ## 分析框架
+    1. **现象识别**：哪些指标出现异常？
+    2. **因果链**：从客流→转化→客单价→营收的漏斗传导路径
+    3. **根因定位**：追溯到品类/区域/人员级别的根本原因
+    4. **影响量化**：估算每个根因对营收/库存/利润的影响金额
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "这个商品有优惠吗？"
+  - "可以退换货吗？"
+  - "有什么新品推荐？"
+  - "会员有什么权益？"
+  - "营业时间是？"
+  - "支持哪些支付方式？"
+  - "有线上商城吗？"
+  - "可以送货上门吗？"

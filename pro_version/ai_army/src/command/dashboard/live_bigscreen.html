@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI军团 · 营业数据指挥中心 LIVE</title>
+<style>
+/* ═══════════════ 变量与基调 ═══════════════ */
+:root {
+  --bg0: #030509;
+  --bg1: #060a14;
+  --panel: rgba(10, 17, 34, 0.52);
+  --panel-strong: rgba(13, 22, 44, 0.72);
+  --line: rgba(94, 168, 255, 0.13);
+  --line-strong: rgba(120, 185, 255, 0.28);
+  --c-blue: #3f8cff;
+  --c-cyan: #2dd4ee;
+  --c-violet: #8b7bff;
+  --c-grn: #35e0a1;
+  --c-red: #ff6b81;
+  --c-gold: #f5c95c;
+  --txt: #e9f2ff;
+  --txt2: #87a2c9;
+  --txt3: #5b7299;
+  --mono: 'Cascadia Code','JetBrains Mono',Consolas,'SF Mono',Menlo,monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: radial-gradient(1200px 600px at 50% -8%, rgba(45, 125, 255, 0.10), transparent 60%),
+              radial-gradient(900px 500px at 85% 110%, rgba(45, 212, 238, 0.07), transparent 55%),
+              var(--bg0);
+  color: var(--txt);
+  font-family: 'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+body::after { /* 全局细微扫描线，增强科技感 */
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 3;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+}
+/* 背景网格层：向上匀速漂移 */
+#gridBg {
+  position: fixed; inset: -100% 0 0 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(90, 165, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(90, 165, 255, 0.055) 1px, transparent 1px);
+  background-size: 56px 56px;
+  animation: gridUp 26s linear infinite;
+  mask-image: radial-gradient(120% 90% at 50% 0%, #000 55%, transparent 100%);
+  -webkit-mask-image: radial-gradient(120% 90% at 50% 0%, #000 55%, transparent 100%);
+}
+@keyframes gridUp { from { transform: translateY(0); } to { transform: translateY(50%); } }
+#starCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+/* ═══════════════ 主体框架 ═══════════════ */
+.frame {
+  position: relative; z-index: 4;
+  height: 100vh; padding: 16px 20px 10px;
+  display: flex; flex-direction: column; gap: 12px;
+  overflow-y: auto; min-width: 1180px;
+}
+/* ---- 顶栏 ---- */
+.topbar {
+  display: flex; align-items: center; gap: 20px;
+  background: var(--panel);
+  border: 1px solid var(--line); border-radius: 12px;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  padding: 10px 22px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.3), 0 10px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(140,190,255,0.08);
+  position: relative; overflow: hidden;
+}
+.topbar::before { /* 顶部电光细线 */
+  content: ''; position: absolute; top: 0; left: 6%; right: 6%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(80,180,255,0.75), rgba(45,212,238,0.6), transparent);
+  filter: drop-shadow(0 0 6px rgba(80,180,255,0.8));
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  width: 40px; height: 40px; border-radius: 9px; position: relative; flex: none;
+  background: linear-gradient(135deg, #16315e, #0a1428);
+  border: 1px solid rgba(110, 180, 255, 0.45);
+  box-shadow: 0 0 16px rgba(63, 140, 255, 0.35), inset 0 0 12px rgba(80,170,255,0.12);
+  display: grid; place-items: center;
+}
+.brand-mark::before {
+  content: ''; width: 16px; height: 16px; transform: rotate(45deg);
+  border: 2px solid var(--c-cyan); border-radius: 3px;
+  box-shadow: 0 0 12px rgba(45, 212, 238, 0.9);
+}
+.brand-txt h1 {
+  font-size: 19px; letter-spacing: 3px; font-weight: 800; line-height: 1.15;
+  background: linear-gradient(90deg, #dcebff, #7cc4ff 55%, #59e3f5);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.brand-txt p { font-size: 10px; letter-spacing: 4.5px; color: var(--txt3); text-transform: uppercase; }
+.hero-title { margin-left: 8px; text-align: center; flex: 1; }
+.hero-title h2 { font-size: 22px; letter-spacing: 6px; font-weight: 700; color: #f2f7ff; text-shadow: 0 0 24px rgba(120, 190, 255, 0.35); }
+.hero-title h2 em { font-style: normal; color: var(--c-cyan); text-shadow: 0 0 14px rgba(45,212,238,0.8); }
+.hero-title p { font-size: 11px; letter-spacing: 3px; color: var(--txt3); margin-top: 2px; }
+.top-right { display: flex; align-items: center; gap: 18px; }
+.clock { text-align: right; }
+.clock .big { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 21px; color: #cfe6ff; letter-spacing: 2px; text-shadow: 0 0 12px rgba(90,170,255,0.5); }
+.clock .sub { font-size: 10px; letter-spacing: 2px; color: var(--txt3); margin-top: 1px; }
+.live-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 11px; letter-spacing: 2px; color: var(--c-cyan);
+  border: 1px solid rgba(45, 212, 238, 0.4); border-radius: 20px; padding: 5px 13px;
+  background: rgba(45, 212, 238, 0.06); box-shadow: 0 0 14px rgba(45,212,238,0.15), inset 0 0 10px rgba(45,212,238,0.05);
+  font-family: var(--mono);
+}
+.live-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c-cyan); box-shadow: 0 0 9px var(--c-cyan); animation: blink 1.5s ease infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* ---- 主体网格 ---- */
+.grid { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+/* KPI 行 */
+.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.kpi {
+  position: relative; overflow: hidden;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  padding: 12px 15px 11px;
+  box-shadow: 0 8px 26px rgba(0,0,0,0.3), inset 0 1px 0 rgba(150,200,255,0.07);
+}
+.kpi::before { content: ''; position: absolute; left: 12px; right: 12px; top: 0; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--k), rgba(255,255,255,0.05)); opacity: 0.85;
+  box-shadow: 0 0 10px var(--k); }
+.kpi-top { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; }
+.kpi-ic { font-size: 15px; filter: drop-shadow(0 0 6px rgba(120,190,255,0.6)); }
+.kpi-name { font-size: 12px; color: var(--txt2); letter-spacing: 1px; }
+.kpi-delta { margin-left: auto; font-size: 10px; font-family: var(--mono); padding: 1px 7px; border-radius: 10px; }
+.kpi-delta.up { color: var(--c-grn); background: rgba(53,224,161,0.1); border: 1px solid rgba(53,224,161,0.28); }
+.kpi-delta.down { color: var(--c-red); background: rgba(255,107,129,0.1); border: 1px solid rgba(255,107,129,0.28); }
+.kpi-delta.flat { color: var(--txt2); background: rgba(135,162,201,0.1); border: 1px solid rgba(135,162,201,0.25); }
+.kpi-val { display: flex; align-items: baseline; gap: 6px; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.kpi-num {
+  font-size: clamp(24px, 2.1vw, 34px); font-weight: 700; letter-spacing: 0.5px;
+  background: linear-gradient(180deg, #ffffff, var(--k2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 22px rgba(90,170,255,0.12);
+  transition: text-shadow .3s;
+}
+.kpi-num.pop { text-shadow: 0 0 26px var(--k); }
+.kpi-unit { font-size: 11px; color: var(--txt3); letter-spacing: 1px; }
+.kpi-foot { margin-top: 7px; display: flex; align-items: center; gap: 8px; }
+.kpi-bar { height: 2px; flex: 1; border-radius: 2px; background: rgba(135,162,201,0.12); overflow: hidden; }
+.kpi-bar i { display: block; height: 100%; width: 100%; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--k)); box-shadow: 0 0 8px var(--k); transform-origin: left; animation: kpiBreath 3s ease-in-out infinite; }
+@keyframes kpiBreath { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
+.kpi-mini { font-family: var(--mono); font-size: 10px; color: var(--txt3); }
+
+/* 中部两列 */
+.mid-row { flex: 1.22; min-height: 0; display: grid; grid-template-columns: 2.05fr 1fr; gap: 12px; }
+.bottom-row { flex: 0.92; min-height: 0; display: grid; grid-template-columns: 1.25fr 1fr; gap: 12px; }
+.panel {
+  position: relative; min-height: 0; display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  padding: 12px 14px 10px;
+  box-shadow: 0 8px 26px rgba(0,0,0,0.3), inset 0 1px 0 rgba(150,200,255,0.06);
+}
+.panel::after { /* 左上角光点装饰 */
+  content: ''; position: absolute; top: -1px; left: -1px; width: 22px; height: 22px;
+  border-top: 2px solid rgba(80,170,255,0.7); border-left: 2px solid rgba(80,170,255,0.7);
+  border-radius: 11px 0 0 0; filter: drop-shadow(0 0 6px rgba(80,170,255,0.7));
+}
+.panel-head { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
+.panel-head .ph-ic { font-size: 14px; }
+.panel-head h3 { font-size: 13px; letter-spacing: 2px; font-weight: 700; color: #dbeaff; }
+.panel-head h3 small { color: var(--txt3); font-weight: 400; margin-left: 7px; letter-spacing: 1px; font-size: 10px; }
+.panel-head .ph-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.panel-body { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+.panel canvas { display: block; width: 100%; flex: 1; min-height: 0; }
+.panel .scroll { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* 折线图图例与底部实时读数 */
+.legend { display: flex; gap: 14px; align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--txt2); letter-spacing: 0.5px; }
+.legend i { width: 14px; height: 3px; border-radius: 2px; box-shadow: 0 0 6px currentColor; }
+.sync-stat { font-family: var(--mono); font-size: 10.5px; color: var(--txt3); letter-spacing: 1px; }
+.sync-stat b { color: var(--c-cyan); font-weight: 600; }
+.trend-nums { flex: none; display: flex; gap: 26px; padding: 6px 2px 0; margin-top: 4px; border-top: 1px solid rgba(110,170,255,0.07); }
+.trend-nums .tn { font-size: 10px; color: var(--txt3); letter-spacing: 1px; display: flex; flex-direction: column; gap: 1px; }
+.trend-nums .tn b { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 14px; letter-spacing: 0; }
+.tn.t0 b { color: var(--c-blue); text-shadow: 0 0 10px rgba(63,140,255,.5); }
+.tn.t1 b { color: var(--c-cyan); text-shadow: 0 0 10px rgba(45,212,238,.5); }
+.tn.t2 b { color: var(--c-violet); text-shadow: 0 0 10px rgba(139,123,255,.5); }
+
+/* 雷达图 */
+.radar-score { text-align: center; }
+.radar-score .rs-main { font-family: var(--mono); font-size: 20px; font-weight: 700; color: #7fe3ff; text-shadow: 0 0 14px rgba(45,212,238,0.6); letter-spacing: 1px; }
+.radar-score .rs-sub { font-size: 9px; color: var(--txt3); letter-spacing: 1.5px; }
+.health-foot { flex: none; display: flex; justify-content: center; gap: 20px; margin-top: 4px; padding-top: 6px; border-top: 1px solid rgba(110,170,255,0.07); }
+.health-foot span { font-size: 10px; color: var(--txt3); display: flex; align-items: center; gap: 5px; }
+.health-foot b { font-family: var(--mono); font-weight: 600; color: var(--c-cyan); }
+
+/* 排行列表 */
+.scroll { overflow: hidden; display: flex; flex-direction: column; }
+.rank-list { display: flex; flex-direction: column; gap: 0; overflow: hidden; }
+.rank-item {
+  display: grid; grid-template-columns: 26px 1fr 1.5fr 84px 46px; align-items: center; gap: 10px;
+  padding: 3px 4px; border-radius: 7px; transition: background .3s;
+}
+.rank-item:hover { background: rgba(90,160,255,0.06); }
+.rk-idx { font-family: var(--mono); font-size: 11px; color: var(--txt3); letter-spacing: 1px; }
+.rank-item:first-child .rk-idx { color: var(--c-gold); text-shadow: 0 0 8px rgba(245,201,92,.6); }
+.rk-name { font-size: 12px; color: var(--txt); letter-spacing: 1px; display: flex; align-items: center; gap: 7px; }
+.rk-name .rk-ic { width: 20px; height: 20px; border-radius: 6px; display: grid; place-items: center; font-size: 11px; background: rgba(120,180,255,0.08); border: 1px solid rgba(120,180,255,0.2); }
+.rk-bar { height: 8px; border-radius: 6px; background: rgba(135,162,201,0.1); overflow: hidden; position: relative; }
+.rk-bar::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.18), transparent); }
+.rk-bar i {
+  display: block; height: 100%; width: 0%; border-radius: 6px; min-width: 2px;
+  background: linear-gradient(90deg, var(--rg), var(--rd)); position: relative;
+  box-shadow: 0 0 10px var(--rd); transition: width .95s cubic-bezier(.3,.9,.25,1);
+}
+.rk-bar i::after { content: ''; position: absolute; right: 0; top: -2px; bottom: -2px; width: 3px; border-radius: 3px; background: #fff; box-shadow: 0 0 8px #fff; opacity: .8; }
+.rk-val { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; text-align: right; color: #cfe6ff; }
+.rk-val small { font-size: 9px; color: var(--txt3); margin-left: 2px; }
+.rk-pct { font-family: var(--mono); font-size: 11px; color: var(--txt2); text-align: right; }
+.rk-pct b { color: #fff; }
+
+/* 日志 */
+.log-list { display: flex; flex-direction: column; gap: 7px; overflow: hidden; }
+.log-item {
+  display: grid; grid-template-columns: 16px 66px 1fr; gap: 9px; align-items: start;
+  padding: 6px 9px; border-radius: 8px;
+  background: rgba(120,170,255,0.035); border: 1px solid rgba(120,170,255,0.08);
+  font-size: 11.5px; line-height: 1.55; color: var(--txt2);
+  animation: logIn .5s cubic-bezier(.2,.8,.25,1) both;
+  position: relative; overflow: hidden;
+}
+.log-item::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; border-radius: 2px; }
+.log-item.run { border-color: rgba(63,140,255,.22); }
+.log-item.run::before { background: var(--c-blue); box-shadow: 0 0 8px var(--c-blue); }
+.log-item.ok { border-color: rgba(53,224,161,.2); }
+.log-item.ok::before { background: var(--c-grn); box-shadow: 0 0 8px var(--c-grn); }
+.log-item.warn { border-color: rgba(245,201,92,.22); }
+.log-item.warn::before { background: var(--c-gold); box-shadow: 0 0 8px var(--c-gold); }
+.log-item.err { border-color: rgba(255,107,129,.24); }
+.log-item.err::before { background: var(--c-red); box-shadow: 0 0 8px var(--c-red); }
+.log-item.info { border-color: rgba(139,123,255,.2); }
+.log-item.info::before { background: var(--c-violet); box-shadow: 0 0 8px var(--c-violet); }
+@keyframes logIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+.log-out { animation: logOut .5s ease both; }
+@keyframes logOut { to { opacity: 0; transform: translateX(16px); } }
+.log-ic { font-size: 11px; text-align: center; padding-top: 1px; }
+.log-item.run .log-ic { color: var(--c-blue); text-shadow: 0 0 8px var(--c-blue); }
+.log-item.ok .log-ic { color: var(--c-grn); text-shadow: 0 0 8px var(--c-grn); }
+.log-item.warn .log-ic { color: var(--c-gold); text-shadow: 0 0 8px var(--c-gold); }
+.log-item.err .log-ic { color: var(--c-red); text-shadow: 0 0 8px var(--c-red); }
+.log-item.info .log-ic { color: var(--c-violet); text-shadow: 0 0 8px var(--c-violet); }
+.log-time { font-family: var(--mono); font-size: 10px; color: var(--txt3); letter-spacing: .5px; padding-top: 1px; }
+.log-txt { word-break: break-word; }
+.log-txt b.kw-q { color: #ffd98a; font-weight: 600; }
+.log-txt b.kw-b { color: #7cc0ff; font-weight: 600; }
+.log-txt b.kw-g { color: #5cf0b6; font-weight: 600; }
+.log-txt b.kw-v { color: #b4a6ff; font-weight: 600; }
+.log-txt b.kw-r { color: #ff94a4; font-weight: 600; }
+
+/* 页脚 */
+.footbar {
+  display: flex; align-items: center; gap: 16px; font-family: var(--mono);
+  font-size: 10px; letter-spacing: 1.5px; color: var(--txt3);
+  padding: 0 6px;
+}
+.footbar .sep { color: rgba(135,162,201,0.3); }
+.footbar .mode { color: var(--c-cyan); }
+.footbar .mode.off { color: var(--txt3); }
+</style>
+</head>
+<body>
+
+<!-- 背景动态层 -->
+<canvas id="starCanvas"></canvas>
+<div id="gridBg"></div>
+
+<div class="frame">
+  <!-- ═══════════ 顶栏 ═══════════ -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-txt">
+        <h1>AI 军团</h1>
+        <p>Legion Command</p>
+      </div>
+    </div>
+    <div class="hero-title">
+      <h2>营业数据 <em>指挥中心</em> · 实时作战态势</h2>
+      <p>REVENUE OPERATIONS INTELLIGENCE — MOCK DATA / WS-READY</p>
+    </div>
+    <div class="top-right">
+      <div class="clock">
+        <div class="big" id="clockBig">--:--:--</div>
+        <div class="sub" id="clockSub">LIVE · 数据刷新中</div>
+      </div>
+      <span class="live-badge"><span class="dot"></span>LIVE</span>
+    </div>
+  </header>
+
+  <!-- ═══════════ 主体 ═══════════ -->
+  <main class="grid">
+
+    <!-- ① KPI 六卡 -->
+    <section class="kpi-row" id="kpiRow"></section>
+
+    <!-- ② 中部：趋势 + 雷达 -->
+    <section class="mid-row">
+      <article class="panel">
+        <div class="panel-head">
+          <span class="ph-ic">📈</span>
+          <h3>实时经营趋势<small>REAL-TIME TREND · 每2.5s推进</small></h3>
+          <div class="ph-right">
+            <div class="legend">
+              <span style="color:#4d9dff"><i style="background:var(--c-blue);color:var(--c-blue)"></i>营业额</span>
+              <span style="color:#39e0f7"><i style="background:var(--c-cyan);color:var(--c-cyan)"></i>客流量</span>
+              <span style="color:#a99bff"><i style="background:var(--c-violet);color:var(--c-violet)"></i>订单量</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <canvas id="trendCanvas"></canvas>
+          <div class="trend-nums">
+            <div class="tn t0"><b id="tv0">--</b><span>当日营业额</span></div>
+            <div class="tn t1"><b id="tv1">--</b><span>累计客流</span></div>
+            <div class="tn t2"><b id="tv2">--</b><span>累计订单</span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <span class="ph-ic">🛡️</span>
+          <h3>店铺健康度<small>HEALTH RADAR</small></h3>
+          <div class="ph-right radar-score">
+            <span class="rs-main" id="healthScore">--</span>
+            <span class="rs-sub">综合指数</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <canvas id="radarCanvas"></canvas>
+          <div class="health-foot" id="healthFoot"></div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ③ 底部：排行 + 日志 -->
+    <section class="bottom-row">
+      <article class="panel">
+        <div class="panel-head">
+          <span class="ph-ic">🏆</span>
+          <h3>模块营业贡献排行<small>CONTRIBUTION RANK</small></h3>
+          <div class="ph-right sync-stat">自动浮动中 <b>⟳</b></div>
+        </div>
+        <div class="panel-body">
+          <div class="scroll rank-list" id="rankList"></div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <span class="ph-ic">🛰️</span>
+          <h3>AI 军团活动日志<small>OPERATIONS FEED</small></h3>
+          <div class="ph-right sync-stat"><b id="logCount">0</b> 条事件 · 实时</div>
+        </div>
+        <div class="panel-body">
+          <div class="scroll log-list" id="logList"></div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- ═══════════ 页脚 ═══════════ -->
+  <footer class="footbar">
+    <span>AI LEGION PRO</span><span class="sep">│</span>
+    <span>数据源：<span class="mode" id="feedMode">MOCK SIMULATION</span></span><span class="sep">│</span>
+    <span>推送间隔 2.5s</span><span class="sep">│</span>
+    <span>九大特种兵在线 · 实时协同</span><span class="sep">│</span>
+    <span id="sysInfo">模拟数据 · 接入 WebSocket 即切换真实推送</span>
+  </footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   AI军团 · 营业数据指挥中心（纯前端演示大屏）
+   ─────────────────────────────────────────────────────────
+   · 数据层与渲染层解耦：MockFeed 模拟推送，WebSocket 接入时
+     仅需替换 feed 实现（见下方 WS_READY 接入点），渲染层零改动。
+   · 主循环：setInterval 驱动数据节拍 → requestAnimationFrame 驱动画面。
+   ═══════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────
+   ▍配置
+   ────────────────────────────────────────────────────────── */
+var CFG = {
+  trendStepMs: 2500,          // 趋势推进节拍（2.5s/帧）
+  trendKeep: 90,              // 折线保留帧数
+  maxLog: 9,                  // 日志保留条数
+  wsUrl: null                 // ★ WS_READY：填入 wss://... 后自动切换真实推送
+};
+
+/* KPI 卡片元信息（--k 顶条色 / --k2 数字渐变底色 / unit / decimals） */
+var KPI_META = [
+  { name: '营业额',     ic: '💰', k: '#3f8cff', k2: '#9cc4ff', unit: '元',   dec: 0, big: true  },
+  { name: '客流量',     ic: '🚶', k: '#2dd4ee', k2: '#8cf0fa', unit: '人次', dec: 0, big: true  },
+  { name: '转化率',     ic: '🎯', k: '#35e0a1', k2: '#9ff5d5', unit: '%',    dec: 1, big: false },
+  { name: '客单价',     ic: '🧾', k: '#8b7bff', k2: '#c5bbff', unit: '元',   dec: 1, big: false },
+  { name: '复购率',     ic: '♻️', k: '#4d9dff', k2: '#a8ccff', unit: '%',    dec: 1, big: false },
+  { name: 'AI 任务数',  ic: '🤖', k: '#f5c95c', k2: '#ffe2a1', unit: '单',   dec: 0, big: true  }
+];
+
+/* ──────────────────────────────────────────────────────────
+   ▍工具：缓动 & 数字格式化
+   ────────────────────────────────────────────────────────── */
+function easeOutExpo(t) { return t >= 1 ? 1 : 1 - Math.pow(2, -10 * t); }
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+function fmtNum(v, dec) {
+  var n = Number(v);
+  return n.toLocaleString('zh-CN', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+function nowClock() { var d = new Date(); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds()); }
+function rand(a, b) { return a + Math.random() * (b - a); }
+function randInt(a, b) { return Math.round(rand(a, b)); }
+function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+/* ──────────────────────────────────────────────────────────
+   ▍数据层 · MockFeed：产生模拟业务样本（对外接口与 WS 消息一致）
+   ────────────────────────────────────────────────────────── */
+var MockFeed = {
+  state: {
+    kpi:  [48620, 1892, 42.6, 73.5, 61.2, 136],   // 与 KPI_META 对齐
+    kpiDelta: [2.4, 1.1, 0.6, -1.8, 3.2, 5.6],
+    trend: [
+      { name: 'revenue', v: 620, label: '营业额' },   // 0-100 强度
+      { name: 'traffic', v: 74,  label: '客流' },
+      { name: 'orders',  v: 56,  label: '订单' }
+    ],
+    radar: [88, 72, 66, 79, 91, 71],   // 流量/转化/客单/复购/口碑/效率
+    rank: [
+      { name: '堂食现点',      ic: '🍽️', v: 18260, seed: 0.62 },
+      { name: '外卖平台',      ic: '🛵', v: 11240, seed: 0.38 },
+      { name: '小程序商城',    ic: '📱', v: 8690,  seed: 0.85 },
+      { name: '会员储值',      ic: '💳', v: 7420,  seed: 0.45 },
+      { name: '团购核销',      ic: '🎫', v: 4310,  seed: 0.30 },
+      { name: 'AI 精准营销',  ic: '🎯', v: 3680,  seed: 0.71 }
+    ]
+  },
+  _trendH: [0.74, 0.58, 0.42],   // 趋势相位种子
+  _logSeq: 0,
+  _tick: 0,
+
+  /* 日志事件池（含高亮词：文案中的「」/AI/情报/营收/诊断 等会被高亮） */
+  _logs: [
+    { type: 'run',  txt: 'AI店长 · 正在生成「周末会员日」营销方案，调用 3 个智能体…' },
+    { type: 'ok',   txt: '营销兵 · 短视频脚本《新品尝鲜局》已生成，AI配图完成' },
+    { type: 'info', txt: '情报兵 · 抓取商圈竞品优惠活动 12 条，动态情报已入库' },
+    { type: 'ok',   txt: '财务官 · 完成今日 营收 分时段归因分析，高峰段 11:30-13:30' },
+    { type: 'warn', txt: '质检兵 · 检测到 客服话术 语气生硬，已自动改写并推送复核' },
+    { type: 'info', txt: '知识兵 · 更新「会员唤醒话术库」，新增 8 条高转化模板' },
+    { type: 'run',  txt: '店长 · 正在诊断 复购率下滑 原因：执行会员召回任务 #2481' },
+    { type: 'ok',   txt: '价格官 · 动态调价完成：午市套餐毛利提升 3.2%，已生效' },
+    { type: 'info', txt: '店长 · 生成 本周经营周报 初稿，等待人工审阅' },
+    { type: 'warn', txt: '预警 · 晚市 客流量 低于同期 12%，已触发 营销 应急包' },
+    { type: 'err',  txt: '异常 · 团购核销接口 抖动 1 次，巡检兵自动重连成功' },
+    { type: 'ok',   txt: '策划师 · 完成「520 表白季」活动排期，ROI 预估 1:4.7' },
+    { type: 'info', txt: '数据官 · 同步昨日 客单价 走势至行业基因库' },
+    { type: 'run',  txt: 'AI店长 · 正在筹备「深夜食堂」外卖活动方案…' },
+    { type: 'ok',   txt: '宣传员 · 小红书种草笔记 发布完成，阅读量 +2.3k' }
+  ],
+
+  /* 生成一次业务样本（trend 推进在渲染层按节拍执行） */
+  step: function () {
+    var s = this.state, n = ++this._tick, out = { type: 'tick', tick: n };
+
+    // KPI：每拍 72% 概率随机微动（平均约 3.5s 跳动一次）
+    if (Math.random() < 0.72) {
+      out.kpi = [];
+      for (var i = 0; i < 6; i++) {
+        var v = s.kpi[i], d = 0;
+        if (i === 2 || i === 3 || i === 4) {          // 百分比类：小幅 ±
+          d = rand(-0.7, 0.9) * (i === 3 ? 1.6 : 1);
+        } else {                                      // 规模类：小幅 +，偶有回落
+          d = v * rand(0.002, 0.02) * (Math.random() < 0.82 ? 1 : -1);
+        }
+        var nv = Math.max(i === 2 || i === 3 || i === 4 ? 5 : 300, v + d);
+        out.kpi.push({ i: i, v: nv });
+        s.kpi[i] = nv;
+        // delta 标签：与上一次变化同向
+        var prevDelta = s.kpiDelta[i];
+        s.kpiDelta[i] = d >= 0 ? rand(0.3, 3.4) : -rand(0.3, 3.4);
+        out.kpi[i].delta = s.kpiDelta[i];
+        void prevDelta;
+      }
+    }
+    // 雷达：每拍 60% 概率更新 1~2 维
+    if (Math.random() < 0.6) {
+      var dims = Math.random() < 0.5 ? 1 : 2;
+      out.radar = [];
+      for (var r = 0; r < dims; r++) {
+        var di = randInt(0, 5);
+        var nd = clamp(s.radar[di] + rand(-5, 5), 42, 99);
+        out.radar.push({ i: di, v: nd });
+        s.radar[di] = nd;
+      }
+    }
+    // 排行：每拍微动
+    out.rank = [];
+    for (var j = 0; j < s.rank.length; j++) {
+      var delta = s.rank[j].v * rand(0.002, 0.012) * (s.rank[j].seed > 0.5 || Math.random() < 0.6 ? 1 : -1);
+      var nrv = Math.max(200, s.rank[j].v + delta);
+      s.rank[j].v = nrv;
+      out.rank.push({ i: j, v: nrv });
+    }
+    // 日志：每拍 60% 概率推 1 条
+    if (Math.random() < 0.6) {
+      var pool = this._logs;
+      out.log = pool[randInt(0, pool.length - 1)];
+      out.logSeq = ++this._logSeq;
+    }
+    return out;
+  },
+
+  /* 趋势推进：为三条曲线生成下一帧强度 */
+  trendNext: function () {
+    var s = this.state, out = [];
+    for (var i = 0; i < 3; i++) {
+      var ph = this._trendH[i] += rand(-0.14, 0.16);
+      // 两条叠加正弦 + 白噪声 → 平滑但真实起伏
+      var tgt = 50 + 44 * Math.sin(ph * 2.4) + 8 * Math.sin(ph * 7.3);
+      tgt = clamp(tgt, 6, 98);
+      s.trend[i].v = lerp(s.trend[i].v, tgt, 0.62) + rand(-2.4, 2.4);
+      s.trend[i].v = clamp(s.trend[i].v, 4, 99);
+      out.push({ i: i, v: s.trend[i].v });
+    }
+    return out;
+  }
+};
+
+/* ──────────────────────────────────────────────────────────
+   ▍数据总线 Hub：统一派发样本（本地 mock 或 WS 消息）
+   ────────────────────────────────────────────────────────── */
+var Hub = {
+  listeners: [],
+  timer: null,
+  onSample: function (fn) { this.listeners.push(fn); return this; },
+  emit: function (sample) { this.listeners.forEach(function (fn) { fn(sample); }); },
+  /* ★ WS_READY：把 wsUrl 填入 CFG.wsUrl，以下逻辑将自动接管，
+     服务端只需按相同结构推送 JSON（type:'tick', kpi/radar/rank/log/trend…） */
+  connectWS: function () {
+    var ws = new WebSocket(CFG.wsUrl);
+    ws.onmessage = function (ev) {
+      try { Hub.emit(JSON.parse(ev.data)); } catch (e) { console.warn('bad ws msg', e); }
+    };
+    ws.onclose = function () { setTimeout(function () { Hub.connectWS(); }, 3000); };
+    return ws;
+  },
+  start: function () {
+    if (CFG.wsUrl) { this.connectWS(); return; }
+    // mock 节拍驱动
+    this.timer = setInterval(function () {
+      Hub.emit(MockFeed.step());       // 业务样本（KPI/雷达/排行/日志）
+      Hub.emit({ type: 'trend', values: MockFeed.trendNext() }); // 折线推进
+    }, CFG.trendStepMs);
+  }
+};
+
+/* ──────────────────────────────────────────────────────────
+   ▍UI 渲染层 · 1) KPI 卡片（滚动缓动 + 实时微跳）
+   ────────────────────────────────────────────────────────── */
+var KpiPanel = {
+  els: [], // {numEl, deltaEl, current}
+  init: function () {
+    var row = document.getElementById('kpiRow');
+    row.innerHTML = KPI_META.map(function (m, i) {
+      var init = i === 2 ? 42.6 : (i === 3 ? 73.5 : (i === 4 ? 61.2 : i === 5 ? 136 : i === 1 ? 1892 : 48620));
+      return '' +
+        '<div class="kpi" style="--k:' + m.k + ';--k2:' + m.k2 + '">' +
+          '<div class="kpi-top"><span class="kpi-ic">' + m.ic + '</span><span class="kpi-name">' + m.name + '</span>' +
+          '<span class="kpi-delta" id="kd-' + i + '"></span></div>' +
+          '<div class="kpi-val"><span class="kpi-num" id="kn-' + i + '">0</span><span class="kpi-unit">' + m.unit + '</span></div>' +
+          '<div class="kpi-foot"><div class="kpi-bar"><i></i></div><span class="kpi-mini">' + fmtNum(init, m.dec) + '</span></div>' +
+        '</div>';
+    }).join('');
+    this.els = KPI_META.map(function (m, i) {
+      return { numEl: document.getElementById('kn-' + i), deltaEl: document.getElementById('kd-' + i), current: MockFeed.state.kpi[i] };
+    });
+  },
+  /* 数字从 from 滚动到 to */
+  tween: function (el, from, to, dur, dec, onEnd) {
+    var t0 = performance.now();
+    (function frame(now) {
+      var p = Math.min(1, (now - t0) / dur);
+      var v = lerp(from, to, easeOutCubic(p));
+      el.textContent = fmtNum(v, dec);
+      if (p < 1) requestAnimationFrame(frame); else if (onEnd) onEnd();
+    })(performance.now());
+  },
+  /* 入场：逐个错峰大滚动（0 → 目标） */
+  intro: function () {
+    this.els.forEach(function (it, i) {
+      var meta = KPI_META[i];
+      setTimeout(function () {
+        KpiPanel.tween(it.numEl, 0, it.current, 1400 + i * 120, meta.dec, function () {
+          it.numEl.classList.add('pop');
+          setTimeout(function () { it.numEl.classList.remove('pop'); }, 900);
+        });
+        KpiPanel.setDelta(i, MockFeed.state.kpiDelta[i]);
+      }, 320 + i * 130);
+    });
+  },
+  setDelta: function (i, d) {
+    var el = this.els[i].deltaEl;
+    if (!el) return;
+    var cls = d > 0.05 ? 'up' : (d < -0.05 ? 'down' : 'flat');
+    var arrow = d > 0.05 ? '▲' : (d < -0.05 ? '▼' : '◆');
+    el.className = 'kpi-delta ' + cls;
+    el.textContent = arrow + ' ' + Math.abs(d).toFixed(1) + '%';
+  },
+  /* 微跳：对单卡做一次短促滚动 */
+  poke: function (i, v, delta) {
+    var it = this.els[i];
+    if (!it) return;
+    var from = it.current, meta = KPI_META[i];
+    it.numEl.classList.add('pop');
+    this.tween(it.numEl, from, v, 720, meta.dec, function () {
+      it.numEl.classList.remove('pop');
+    });
+    it.current = v;
+    this.setDelta(i, delta);
+    var mini = document.querySelector('.kpi:nth-child(' + (i + 1) + ') .kpi-mini');
+    if (mini) mini.textContent = fmtNum(v, meta.dec);
+  },
+  onSample: function (s) {
+    if (!s.kpi) return;
+    s.kpi.forEach(function (k) { KpiPanel.poke(k.i, k.v, k.delta || 0); });
+  }
+};
+
+/* ──────────────────────────────────────────────────────────
+   ▍UI 渲染层 · 2) 背景：星点 + 微光（Canvas，向上漂移）
+   ────────────────────────────────────────────────────────── */
+var Stars = {
+  cv: null, ctx: null, stars: [], W: 0, H: 0,
+  init: function () {
+    this.cv = document.getElementById('starCanvas');
+    this.ctx = this.cv.getContext('2d');
+    this.resize();
+    var n = Math.floor(window.innerWidth * window.innerHeight / 5200);
+    for (var i = 0; i < n; i++) this.stars.push(this._make());
+    window.addEventListener('resize', this.resize.bind(this));
+  },
+  _make: function () {
+    return {
+      x: Math.random() * this.W, y: Math.random() * this.H,
+      r: rand(0.4, 1.7), a: rand(0.12, 0.7), sp: rand(3, 16) / 100,
+      tw: rand(0.5, 2.4), ph: Math.random() * Math.PI * 2,
+      blue: Math.random() < 0.55
+    };
+  },
+  resize: function () {
+    this.W = window.innerWidth; this.H = window.innerHeight;
+    this.cv.width = this.W; this.cv.height = this.H;
+  },
+  frame: function (t) {
+    var ctx = this.ctx;
+    ctx.clearRect(0, 0, this.W, this.H);
+    for (var i = 0; i < this.stars.length; i++) {
+      var st = this.stars[i];
+      st.y -= st.sp;
+      if (st.y < -4) { st.y = this.H + 4; st.x = Math.random() * this.W; }
+      var alpha = st.a * (0.55 + 0.45 * Math.sin(t / 1000 * st.tw + st.ph));
+      ctx.beginPath();
+      ctx.arc(st.x, st.y, st.r, 0, 6.2832);
+      ctx.fillStyle = st.blue ? 'rgba(150,200,255,' + alpha + ')' : 'rgba(210,235,255,' + alpha * 0.7 + ')';
+      ctx.shadowColor = st.blue ? 'rgba(110,170,255,0.8)' : 'rgba(160,220,255,0.5)';
+      ctx.shadowBlur = st.r * 3.2;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+};
+
+/* ──────────────────────────────────────────────────────────
+   ▍UI 渲染层 · 3) 实时趋势折线图（发光渐变曲线 + 面积）
+   ────────────────────────────────────────────────────────── */
+var Trend = {
+  cv: null, ctx: null, dpr: 1,
+  W: 0, H: 0, PAD: { l: 42, r: 16, t: 14, b: 22 },
+  cols: ['#3f8cff', '#2dd4ee', '#8b7bff'],
+  names: ['营业额', '客流量', '订单量'],
+  data: [[], [], []],
+  maxV: [48620, 1892, 156],       // 底部实时读数的满量程估值（仅展示用）
+  lastTick: 0,
+  init: function () {
+    this.cv = document.getElementById('trendCanvas');
+    this.ctx = this.cv.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', this.resize.bind(this));
+    // 预填满历史帧（曲线铺满画布，避免生长挤压）
+    for (var i = 0; i < CFG.trendKeep; i++) {
+      var v = MockFeed.trendNext();
+      v.forEach(function (d) { Trend.data[d.i].push(d.v); });
+    }
+    this.lastTick = performance.now();
+    this.render(performance.now());
+  },
+  resize: function () {
+    var rect = this.cv.getBoundingClientRect();
+    this.dpr = window.devicePixelRatio || 1;
+    this.W = rect.width; this.H = rect.height;
+    this.cv.width = Math.max(1, Math.round(rect.width * this.dpr));
+    this.cv.height = Math.max(1, Math.round(rect.height * this.dpr));
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+  },
+  push: function (vals) {
+    this.lastTick = performance.now();
+    vals.forEach(function (d) {
+      var arr = Trend.data[d.i];
+      arr.push(d.v);
+      if (arr.length > CFG.trendKeep) arr.shift();
+    });
+  },
+  _linePath: function (arr, xOf, iFrom) {
+    var n = arr.length, ctx = this.ctx, step = 0;
+    ctx.beginPath();
+    for (var i = iFrom; i < n; i++) {
+      var x = xOf(i), y = 8 + (100 - arr[i]) / 100 * (this.H - this.PAD.t - this.PAD.b - 8);
+      if (i === iFrom) ctx.moveTo(x, y);
+      else {
+        var px = xOf(i - 1), py = 8 + (100 - arr[i - 1]) / 100 * (this.H - this.PAD.t - this.PAD.b - 8);
+        var mx = (px + x) / 2;
+        ctx.quadraticCurveTo(px, py, mx, py);
+        ctx.quadraticCurveTo(x, py, x, y);  // 中值平滑
+        step = 1;
+      }
+    }
+    return step;
+  },
+  render: function (t) {
+    requestAnimationFrame(Trend.render.bind(Trend));
+    var ctx = this.ctx, w = this.W, h = this.H, P = this.PAD;
+    if (!w) return;
+    ctx.clearRect(0, 0, w, h);
+    var plotH = h - P.t - P.b, plotW = w - P.l - P.r;
+    if (plotW < 10) return;
+
+    var xOf = function (i) { return P.l + i * (plotW / (CFG.trendKeep - 1)); };
+
+    // —— 网格 ——
+    ctx.save();
+    ctx.strokeStyle = 'rgba(110,170,255,0.09)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 5]);
+    ctx.font = '9px ' + getComputedStyle(document.body).getPropertyValue('--mono') || 'monospace';
+    ctx.fillStyle = 'rgba(120,150,200,0.5)';
+    for (var gy = 0; gy <= 4; gy++) {
+      var yy = P.t + plotH * gy / 4;
+      ctx.beginPath(); ctx.moveTo(P.l, yy); ctx.lineTo(w - P.r, yy); ctx.stroke();
+      var lbl = Math.round(100 - 100 * gy / 4);
+      ctx.fillText(lbl + '%', 4, yy + 3);
+    }
+    // 纵向时间刻度
+    ctx.textAlign = 'center';
+    var step = Math.ceil(CFG.trendKeep / 6 / 5) * 5;
+    for (var gx = 0; gx < 6; gx++) {
+      var xx = P.l + plotW * gx / 5;
+      ctx.beginPath(); ctx.moveTo(xx, P.t); ctx.lineTo(xx, h - P.b); ctx.stroke();
+      var secs = Math.round((5 - gx) * step * CFG.trendStepMs / 1000);
+      ctx.fillText(secs + 's', xx, h - 8);
+    }
+    ctx.textAlign = 'left';
+    ctx.restore();
+
+    // —— 数据曲线 ——
+    var tPhase = clamp((t - this.lastTick) / CFG.trendStepMs, 0, 1);
+    var ease = easeOutCubic(tPhase);
+    for (var s = 0; s < 3; s++) {
+      var arr = this.data[s];
+      if (arr.length < 2) continue;
+      var n = arr.length;
+      var n1 = arr.length >= 3 ? arr[arr.length - 2] : arr[arr.length - 1];
+      var lastY = 8 + (100 - lerp(n1, arr[arr.length - 1], ease)) / 100 * plotH;
+
+      // 面积渐变
+      var grad = ctx.createLinearGradient(0, P.t, 0, h - P.b);
+      grad.addColorStop(0, this.cols[s] + '55');
+      grad.addColorStop(1, this.cols[s] + '00');
+      ctx.beginPath();
+      // 画到倒数第二点为止（尾部用插值点到基线）
+      for (var i2 = 0; i2 < n - 1; i2++) {
+        var x2 = xOf(i2), y2 = 8 + (100 - arr[i2]) / 100 * plotH;
+        if (i2 === 0) ctx.moveTo(x2, y2);
+        else { var px2 = xOf(i2 - 1), py2 = 8 + (100 - arr[i2 - 1]) / 100 * plotH; ctx.quadraticCurveTo(px2, py2, (px2 + x2) / 2, (py2 + y2) / 2); }
+      }
+      if (n >= 2) ctx.lineTo(xOf(n - 1), lastY);
+      ctx.lineTo(xOf(n - 1), h - P.b);
+      ctx.lineTo(xOf(0), h - P.b);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // 发光主线
+      ctx.save();
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.strokeStyle = this.cols[s];
+      ctx.globalAlpha = 0.25;
+      ctx.lineWidth = 5;
+      ctx.shadowColor = this.cols[s];
+      ctx.shadowBlur = 14;
+      this._strokePath(arr, xOf, lastY, n, plotH);
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 1.8;
+      ctx.shadowBlur = 5;
+      this._strokePath(arr, xOf, lastY, n, plotH);
+      ctx.restore();
+
+      // 端点光点
+      if (n >= 2) {
+        ctx.beginPath();
+        ctx.arc(xOf(n - 1), lastY, 3.2, 0, 6.2832);
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = this.cols[s];
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(xOf(n - 1), lastY, 6.5, 0, 6.2832);
+        ctx.strokeStyle = this.cols[s];
+        ctx.globalAlpha = 0.45;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+      }
+    }
+  },
+  _strokePath: function (arr, xOf, lastY, n, plotH) {
+    var ctx = this.ctx;
+    ctx.beginPath();
+    for (var i = 0; i < n; i++) {
+      var y = 8 + (100 - arr[i]) / 100 * plotH;
+      if (i === 0) ctx.moveTo(xOf(0), y);
+      else if (i === n - 1) ctx.lineTo(xOf(n - 1), lastY);
+      else {
+        var px = xOf(i - 1), py = 8 + (100 - arr[i - 1]) / 100 * plotH;
+        var x = xOf(i);
+        ctx.quadraticCurveTo(px, py, (px + x) / 2, (py + y) / 2);
+      }
+    }
+    ctx.stroke();
+  },
+  _orders: 156,
+  onTrend: function (vals) {
+    this.push(vals);
+    // 底部实时读数：营业额/客流与 KPI 卡联动；订单量单调累计（模拟全天滚量）
+    var lastV = vals[vals.length - 1].v;
+    this._orders += Math.max(1, Math.round(clamp(lastV, 0, 100) / 100 * 2.4 + 0.3));
+    var st = MockFeed.state;
+    var set = function (idx, txt) { var el = document.getElementById('tv' + idx); if (el) el.textContent = txt; };
+    set(0, fmtNum(st.kpi[0], 0));
+    set(1, fmtNum(st.kpi[1], 0));
+    set(2, fmtNum(this._orders, 0));
+  }
+};
+
+/* ──────────────────────────────────────────────────────────
+   ▍UI 渲染层 · 4) 健康度雷达图（蓝青渐变多边形）
+   ────────────────────────────────────────────────────────── */
+var Radar = {
+  cv: null, ctx: null, dpr: 1,
+  W: 0, H: 0, cx: 0, cy: 0, R: 0,
+  labels: ['流量', '转化', '客单', '复购', '口碑', '效率'],
+  target: [88, 72, 66, 79, 91, 71],      // 目标值（数据层驱动）
+  show: [88, 72, 66, 79, 91, 71],        // 显示值（插值平滑）
+  lastDim: -1,
+  init: function () {
+    this.cv = document.getElementById('radarCanvas');
+    this.ctx = this.cv.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', this.resize.bind(this));
+  },
+  resize: function () {
+    var rect = this.cv.getBoundingClientRect();
+    this.dpr = window.devicePixelRatio || 1;
+    this.W = rect.width; this.H = rect.height;
+    this.cv.width = Math.max(1, Math.round(rect.width * this.dpr));
+    this.cv.height = Math.max(1, Math.round(rect.height * this.dpr));
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.cx = rect.width / 2;
+    this.cy = rect.height / 2 + 2;
+    this.R = Math.min(rect.width, rect.height) / 2 - 36;
+  },
+  pt: function (idx, val) {
+    var ang = -Math.PI / 2 + idx * Math.PI * 2 / 6;
+    return [this.cx + Math.cos(ang) * this.R * val / 100, this.cy + Math.sin(ang) * this.R * val / 100];
+  },
+  frame: function () {
+    requestAnimationFrame(Radar.frame.bind(Radar));
+    var ctx = this.ctx, w = this.W, h = this.H;
+    if (!w || !h) return;
+    ctx.clearRect(0, 0, w, h);
+    // 插值逼近目标
+    for (var i = 0; i < 6; i++) this.show[i] = lerp(this.show[i], this.target[i], 0.08);
+    this._syncScore();
+
+    // —— 背景网格（3层六边形 + 6条轴）——
+    var ring = this.R * 0.62;
+    for (var lvl = 0; lvl < 3; lvl++) {
+      ctx.beginPath();
+      for (var v1 = 0; v1 <= 6; v1++) {
+        var vv = v1 % 6;
+        var p0 = [this.cx + Math.cos(-Math.PI / 2 + vv * Math.PI / 3) * ring * (1 + lvl) / 3,
+                  this.cy + Math.sin(-Math.PI / 2 + vv * Math.PI / 3) * ring * (1 + lvl) / 3];
+        v1 === 0 ? ctx.moveTo(p0[0], p0[1]) : ctx.lineTo(p0[0], p0[1]);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = 'rgba(110,175,255,' + (0.16 - lvl * 0.03) + ')';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    for (var ax = 0; ax < 6; ax++) {
+      var pp = this.pt(ax, 100);
+      ctx.beginPath(); ctx.moveTo(this.cx, this.cy); ctx.lineTo(pp[0], pp[1]);
+      ctx.strokeStyle = 'rgba(110,175,255,0.10)';
+      ctx.stroke();
+    }
+
+    // —— 数据多边形（蓝→青渐变 + 发光描边）——
+    var poly = [];
+    for (var pIdx = 0; pIdx < 6; pIdx++) poly.push(this.pt(pIdx, this.show[pIdx]));
+    var rad = ctx.createRadialGradient(this.cx, this.cy, 4, this.cx, this.cy, this.R);
+    rad.addColorStop(0, 'rgba(45,212,238,0.42)');
+    rad.addColorStop(0.6, 'rgba(63,140,255,0.20)');
+    rad.addColorStop(1, 'rgba(139,123,255,0.02)');
+    ctx.beginPath();
+    poly.forEach(function (p, idx) { idx === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]); });
+    ctx.closePath();
+    ctx.fillStyle = rad;
+    ctx.fill();
+    ctx.save();
+    ctx.strokeStyle = '#3dd6ff';
+    ctx.lineWidth = 1.8;
+    ctx.shadowColor = 'rgba(45,212,238,0.9)';
+    ctx.shadowBlur = 16;
+    ctx.stroke();
+    ctx.restore();
+
+    // —— 顶点 + 标签 + 数值 ——
+    var dims = this.labels;
+    for (var di = 0; di < 6; di++) {
+      var val = this.show[di];
+      var p = this.pt(di, val);
+      // 顶点
+      ctx.beginPath();
+      ctx.arc(p[0], p[1], 3, 0, 6.2832);
+      ctx.fillStyle = '#bff3ff';
+      ctx.shadowColor = '#2dd4ee';
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      // 标签（顶点外扩）
+      var ang = -Math.PI / 2 + di * Math.PI * 2 / 6;
+      var lx = this.cx + Math.cos(ang) * (this.R + 17);
+      var ly = this.cy + Math.sin(ang) * (this.R + 14);
+      ctx.font = '11px "Microsoft YaHei", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(190,215,255,0.85)';
+      ctx.fillText(dims[di], lx, ly);
+      ctx.font = '10px ' + (getComputedStyle(document.body).getPropertyValue('--mono') || 'Consolas');
+      ctx.fillStyle = 'rgba(120,230,255,0.95)';
+      ctx.fillText(Math.round(val) + '', lx, ly + (Math.abs(Math.cos(ang)) < 0.4 ? 13 : -12));
+    }
+    // 中心微光
+    var cg = ctx.createRadialGradient(this.cx, this.cy, 0, this.cx, this.cy, this.R * 0.34);
+    cg.addColorStop(0, 'rgba(45,212,238,0.10)');
+    cg.addColorStop(1, 'rgba(45,212,238,0)');
+    ctx.beginPath(); ctx.arc(this.cx, this.cy, this.R * 0.34, 0, 6.2832);
+    ctx.fillStyle = cg; ctx.fill();
+  },
+  _scoreShown: -1,
+  onRadar: function (items) {
+    items.forEach(function (it) { Radar.target[it.i] = it.v; });
+  },
+  /* 综合分 + 底栏提示：仅在整分变化时刷新 DOM */
+  _syncScore: function () {
+    var avg = this.show.reduce(function (a, b) { return a + b; }, 0) / 6;
+    var sc = Math.round(avg);
+    if (sc === this._scoreShown) return;
+    this._scoreShown = sc;
+    var el = document.getElementById('healthScore');
+    if (el) el.textContent = sc;
+    var minIdx = 0, maxIdx = 0;
+    for (var i = 1; i < 6; i++) {
+      if (this.show[i] < this.show[minIdx]) minIdx = i;
+      if (this.show[i] > this.show[maxIdx]) maxIdx = i;
+    }
+    var hf = document.getElementById('healthFoot');
+    if (hf) hf.innerHTML = '<span>综合 <b>' + sc + '</b></span>' +
+      '<span>最优 <b>' + this.labels[maxIdx] + '</b></span>' +
+      '<span>建议关注 <b>' + this.labels[minIdx] + '</b></span>';
+  }
+};
+
+/* ──────────────────────────────────────────────────────────
+   ▍UI 渲染层 · 5) 模块排行（渐变进度条 + 百分比跳动）
+   ────────────────────────────────────────────────────────── */
+var RankPanel = {
+  colors: [
+    { g: '#1c5cff', d: '#5ae7ff' },
+    { g: '#0f9bff', d: '#8b7bff' },
+    { g: '#8b7bff', d: '#2dd4ee' },
+    { g: '#4d9dff', d: '#35e0a1' },
+    { g: '#2dd4ee', d: '#4d9dff' },
+    { g: '#f5c95c', d: '#3f8cff' }
+  ],
+  itemEls: [],
+  init: function () {
+    var list = document.getElementById('rankList');
+    var s = MockFeed.state.rank;
+    var total = s.reduce(function (a, b) { return a + b.v; }, 0);
+    list.innerHTML = s.map(function (r, i) {
+      var c = RankPanel.colors[i];
+      var pct = (r.v / total * 100);
+      return '' +
+        '<div class="rank-item">' +
+          '<span class="rk-idx">' + pad2(i + 1) + '</span>' +
+          '<span class="rk-name"><span class="rk-ic">' + r.ic + '</span>' + r.name + '</span>' +
+          '<span class="rk-bar"><i style="--rg:' + c.g + ';--rd:' + c.d + '"></i></span>' +
+          '<span class="rk-val"><span class="rk-num">' + fmtNum(r.v, 0) + '</span><small>元</small></span>' +
+          '<span class="rk-pct"><b class="rk-pn">' + pct.toFixed(1) + '</b>%</span>' +
+        '</div>';
+    }).join('');
+    this.itemEls = Array.prototype.slice.call(list.querySelectorAll('.rank-item'));
+    // 初始渲染宽度/数值（后续由 onSample 动画驱动实时浮动）
+    this.itemEls.forEach(function (el, idx) {
+      var r = MockFeed.state.rank[idx];
+      el.querySelector('.rk-bar i').style.width = (r.v / total * 100) + '%';
+      el.querySelector('.rk-num').textContent = fmtNum(r.v, 0);
+      el.querySelector('.rk-pn').textContent = (r.v / total * 100).toFixed(1);
+    });
+  },
+  onSample: function (s) {
+    if (!s.rank) return;
+    var total = MockFeed.state.rank.reduce(function (a, b) { return a + b.v; }, 0);
+    s.rank.forEach(function (it) {
+      var el = RankPanel.itemEls[it.i];
+      if (!el) return;
+      var bar = el.querySelector('.rk-bar i');
+      var num = el.querySelector('.rk-num');
+      var pn = el.querySelector('.rk-pn');
+      var r = MockFeed.state.rank[it.i];
+      var from = parseFloat(num.textContent.replace(/,/g, '')) || 0;
+      // 进度条
+      bar.style.width = (r.v / total * 100) + '%';
+      // 数值滚动
+      KpiPanel.tween(num, from, r.v, 900, 0, function () {
+        var vv = parseFloat(num.textContent.replace(/,/g, ''));
+        num.textContent = fmtNum(vv, 0);
+      });
+      // 占比跳动
+      var pv = r.v / total * 100;
+      KpiPanel.tween(pn, parseFloat(pn.textContent), pv, 900, 1);
+    });
+  }
+};
+
+/* ──────────────────────────────────────────────────────────
+   ▍UI 渲染层 · 6) AI 军团活动日志（关键词高亮）
+   ────────────────────────────────────────────────────────── */
+var LogPanel = {
+  list: null, count: 0,
+  init: function () {
+    this.list = document.getElementById('logList');
+    // 预置 3 条历史
+    ['ok', 'info', 'run'].forEach(function (tp, i) {
+      setTimeout(function () {
+        LogPanel.add({ type: tp, txt: ['AI军团启动完成，9 名特种兵在线待命', '情报网 · 行业基因库同步 128 条商圈数据', 'AI店长 · 正在初始化今日经营策略…'][i] });
+      }, 400 + i * 260);
+    });
+  },
+  /* 关键词高亮：业务词先染色，引用「」最后高亮 */
+  _hl: function (txt) {
+    return txt
+      .replace(/(情报|爬取|抓取|行业基因库|动态情报)/g, '<b class="kw-v">$1</b>')
+      .replace(/(营收|复购率|客流量|客单价|毛利|ROI|转化率)/g, '<b class="kw-b">$1</b>')
+      .replace(/(营销|方案|活动|周报|调价|种草|排期|会员召回|应急包)/g, '<b class="kw-g">$1</b>')
+      .replace(/(失败|异常|抖动|下滑|预警)/g, '<b class="kw-r">$1</b>')
+      .replace(/(完成|成功|提升|发布|生效|就位|重连)/g, '<b class="kw-b">$1</b>')
+      .replace(/「([^」]*)」/g, '<b class="kw-q">「$1」</b>');
+  },
+  add: function (item) {
+    if (!this.list) this.list = document.getElementById('logList');
+    var el = document.createElement('div');
+    el.className = 'log-item ' + (item.type || 'info');
+    var ic = item.type === 'ok' ? '✓' : item.type === 'err' ? '✕' : item.type === 'warn' ? '⚠' : item.type === 'run' ? '◈' : 'i';
+    el.innerHTML = '<span class="log-ic">' + ic + '</span>' +
+                   '<span class="log-time">' + nowClock() + '</span>' +
+                   '<span class="log-txt">' + this._hl(item.txt) + '</span>';
+    this.list.insertBefore(el, this.list.firstChild);
+    this.count++;
+    var c = document.getElementById('logCount');
+    if (c) c.textContent = this.count;
+    // 按容器可视高度自适应裁剪（小屏自动少留几行）
+    while (this.list.scrollHeight > this.list.clientHeight + 4 && this.list.children.length > 3) {
+      var last = this.list.lastChild;
+      if (last && last.parentNode) last.parentNode.removeChild(last);
+    }
+  },
+  onSample: function (s) {
+    if (!s.log) return;
+    LogPanel.add(s.log);
+  }
+};
+
+/* ──────────────────────────────────────────────────────────
+   ▍渲染调度：Hub 样本 → 各面板（WS 消息同构）
+   ────────────────────────────────────────────────────────── */
+Hub.onSample(function (sample) {
+  if (sample.type === 'trend') { Trend.onTrend(sample.values); return; }
+  KpiPanel.onSample(sample);
+  if (sample.radar) Radar.onRadar(sample.radar);
+  RankPanel.onSample(sample);
+  LogPanel.onSample(sample);
+});
+
+/* ──────────────────────────────────────────────────────────
+   ▍顶栏时钟 / 页脚 / 主循环启动
+   ────────────────────────────────────────────────────────── */
+function tickClock() {
+  var d = new Date();
+  var week = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()];
+  document.getElementById('clockBig').textContent = nowClock();
+  document.getElementById('clockSub').textContent =
+    d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) +
+    ' 星期' + week + ' · ' + (CFG.wsUrl ? 'WS 实时推送' : '模拟节拍驱动');
+}
+function boot() {
+  // 背景
+  Stars.init();
+  // 面板
+  KpiPanel.init(); KpiPanel.intro();
+  Trend.init();
+  Radar.init(); Radar.frame();
+  RankPanel.init();
+  LogPanel.init();
+  // 时钟
+  tickClock();
+  setInterval(tickClock, 1000);
+  // 数据源
+  Hub.start();
+  // 主绘制循环（星点由独立循环驱动，节省CPU仅在两块 canvas 动画）
+  (function starLoop(ts) { Stars.frame(ts); requestAnimationFrame(starLoop); })(performance.now());
+  // 页脚数据源状态
+  var mode = document.getElementById('feedMode');
+  mode.textContent = CFG.wsUrl ? 'WEB SOCKET LIVE' : 'MOCK SIMULATION';
+  mode.className = CFG.wsUrl ? 'mode' : 'mode off';
+  document.getElementById('sysInfo').textContent = CFG.wsUrl
+    ? 'WebSocket 已连接：' + CFG.wsUrl
+    : '纯前端模拟 · 将 CFG.wsUrl 填入真实地址即可接入实时推送（渲染层零改动）';
+}
+window.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>

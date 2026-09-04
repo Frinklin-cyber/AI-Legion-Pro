@@ -1,0 +1,251 @@
+# 酒店住宿行业基因库
+id: hotel
+name: 酒店住宿
+icon: "🏨"
+description: "酒店、民宿、客栈、公寓、青旅等"
+subcategories:
+  - 经济型酒店
+  - 中端商务酒店
+  - 高端/星级酒店
+  - 民宿客栈
+  - 度假酒店
+  - 青年旅舍
+  - 服务式公寓
+  - 电竞酒店
+
+default_search_radius: 2000
+
+amap_poi_type: "100000"
+tencent_poi_type: "酒店宾馆"
+
+kpi_formulas:
+  入住率:
+    formula: "已售房间数 / 可售房间数 * 100"
+    description: "100间房里有几间被订了"
+    unit: "%"
+    importance: critical
+    raw_inputs:
+      - key: 总房间数
+        question: "一共有多少间房？"
+        placeholder: "比如：100"
+        unit: 间
+      - key: 已售房间数
+        question: "今天卖出（入住）了多少间？"
+        placeholder: "比如：80"
+        unit: 间
+    compute_expr: "已售房间数 / 总房间数 * 100"
+  平均房价:
+    formula: "客房总收入 / 已售房间数"
+    description: "每间房平均卖多少钱"
+    unit: 元
+    importance: critical
+    raw_inputs:
+      - key: 客房总收入
+        question: "今天客房总共卖了多少钱？"
+        placeholder: "比如：24000"
+        unit: 元
+      - key: 卖出间数
+        question: "今天一共卖了多少间房？"
+        placeholder: "比如：80"
+        unit: 间
+    compute_expr: "客房总收入 / 卖出间数"
+  RevPAR:
+    formula: "客房总收入 / 可售房间数"
+    description: "每间房每天平均能赚多少钱"
+    unit: 元
+    importance: critical
+    raw_inputs:
+      - key: 总房间数2
+        question: "一共有多少间房？"
+        placeholder: "比如：100"
+        unit: 间
+      - key: 客房总收入2
+        question: "今天客房总共卖了多少钱？"
+        placeholder: "比如：24000"
+        unit: 元
+    compute_expr: "客房总收入2 / 总房间数2"
+  客单价:
+    formula: "总营收 / 入住间夜数"
+    description: "每个客人平均消费多少钱"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 总营收
+        question: "今天酒店总收入是多少（含餐饮等其他）？"
+        placeholder: "比如：30000"
+        unit: 元
+      - key: 入住间夜数
+        question: "今天一共入住了多少间夜？"
+        placeholder: "比如：90"
+        unit: 间夜
+    compute_expr: "总营收 / 入住间夜数"
+  OTA占比:
+    formula: "OTA渠道订单 / 总订单 * 100"
+    description: "携程/美团等平台订单占多少"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: OTA订单数
+        question: "通过携程、美团等平台来了多少订单？"
+        placeholder: "比如：45"
+        unit: 单
+      - key: 总订单数
+        question: "今天一共多少笔订单？"
+        placeholder: "比如：100"
+        unit: 单
+    compute_expr: "OTA订单数 / 总订单数 * 100"
+  会员预订占比:
+    formula: "会员直接预订 / 总预订 * 100"
+    description: "会员直接预订占多少"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 会员预订数
+        question: "会员直接预订了多少间？"
+        placeholder: "比如：30"
+        unit: 间
+      - key: 总预订数
+        question: "今天总共有多少预订？"
+        placeholder: "比如：100"
+        unit: 间
+    compute_expr: "会员预订数 / 总预订数 * 100"
+  好评率:
+    formula: "4分及以上评价 / 总评价 * 100"
+    description: "10个客人里有多少个给好评"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 好评数
+        question: "最近有多少条好评（4分以上）？"
+        placeholder: "比如：45"
+        unit: 条
+      - key: 总评价数
+        question: "总共有多少条评价？"
+        placeholder: "比如：50"
+        unit: 条
+    compute_expr: "好评数 / 总评价数 * 100"
+  续住率:
+    formula: "连住客人 / 总住客 * 100"
+    description: "10个客人里有多少个续住了"
+    unit: "%"
+    importance: medium
+    raw_inputs:
+      - key: 连住人数
+        question: "有多少客人住了超过一晚？"
+        placeholder: "比如：30"
+        unit: 人
+      - key: 总住客数
+        question: "今天总共多少住客？"
+        placeholder: "比如：100"
+        unit: 人
+    compute_expr: "连住人数 / 总住客数 * 100"
+
+benchmarks:
+  入住率:
+    excellent: 85
+    good: 72
+    average: 60
+    poor: 45
+  平均房价:
+    economy: 120
+    mid: 250
+    premium: 600
+  RevPAR:
+    economy: 100
+    mid: 180
+    premium: 450
+  OTA占比:
+    excellent: 15
+    good: 25
+    average: 40
+    poor: 55
+  好评率:
+    excellent: 95
+    good: 88
+    average: 80
+    poor: 72
+
+red_flags:
+  - metric: 入住率
+    threshold: "< 45"
+    severity: critical
+    description: "入住率低于45%意味着固定成本无法被摊销"
+  - metric: OTA占比
+    threshold: "> 55"
+    severity: critical
+    description: "过度依赖OTA渠道，佣金侵蚀利润且缺乏客户粘性"
+  - metric: 好评率
+    threshold: "< 72"
+    severity: high
+    description: "好评率低将严重影响OTA排名和新客获取"
+  - metric: RevPAR
+    threshold: "较上月降幅 > 20%"
+    severity: high
+    description: "RevPAR大幅下降需要检查定价策略和市场需求"
+
+competitor_focus:
+  - "周边2km同档次酒店"
+  - "OTA平台价格变化"
+  - "竞品评分与评价趋势"
+  - "新开业或翻新酒店"
+  - "竞品促销与套餐变化"
+  - "商圈内大型活动/会议"
+
+marketing_scenarios:
+  - name: "节假日套餐"
+    icon: "🎉"
+    desc: "节假日/黄金周住宿套餐"
+  - name: "新客首单"
+    icon: "🎁"
+    desc: "新客首单优惠方案"
+  - name: "好评引导"
+    icon: "⭐"
+    desc: "引导住客写好评的话术"
+  - name: "周边攻略"
+    icon: "🗺️"
+    desc: "酒店周边吃喝玩乐指南"
+  - name: "会员日特惠"
+    icon: "👑"
+    desc: "会员专属房价活动"
+  - name: "商务套餐"
+    icon: "💼"
+    desc: "商旅住宿+会议套餐"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行诊断分析：
+
+    ## 行业基准（{store_type}）
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+    ## 分析规则
+    1. 重点关注入住率、RevPAR、OTA占比三大核心指标
+    2. RevPAR的同环比分析和驱动因素分解（入住率驱动还是ADR驱动）
+    3. OTA渠道成本与直销渠道收益对比
+    4. 建议必须可量化
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请对以下酒店经营数据进行因果归因分析：
+
+    ## 分析框架
+    1. **现象识别**：哪些指标出现异常？
+    2. **因果链**：评价→OTA排名→预订量→入住率→RevPAR的完整传导链
+    3. **根因定位**：追溯到房型/渠道/时段/服务维度
+    4. **影响量化**：每个根因对RevPAR和利润的实际影响
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "还有房间吗？什么房型？"
+  - "入住/退房时间是？"
+  - "有停车场吗？收费吗？"
+  - "含早餐吗？"
+  - "可以带宠物吗？"
+  - "离机场/火车站多远？"
+  - "可以延迟退房吗？"

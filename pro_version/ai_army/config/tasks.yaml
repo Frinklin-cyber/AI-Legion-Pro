@@ -1,0 +1,78 @@
+# AI军团 - 任务配置文件
+# 定义所有定时任务和自动化流程
+
+tasks:
+  # ========== 侦察兵任务 ==========
+  - name: "每日情报简报"
+    id: "daily_intelligence"
+    soldier: "scout_summarizer"
+    schedule: "0 8 * * *"  # 每天8:00
+    description: "爬取行业资讯→AI生成简报→推送企业微信"
+    enabled: true
+
+  - name: "竞品动态监控"
+    id: "competitor_monitor"
+    soldier: "scout_summarizer"
+    schedule: "0 */6 * * *"  # 每6小时
+    description: "监控指定竞品网站更新"
+    enabled: true
+
+  # ========== 参谋部任务 ==========
+  - name: "每周数据报告"
+    id: "weekly_data_report"
+    soldier: "staff_analyst"
+    schedule: "0 9 * * 1"  # 每周一9:00
+    description: "自动读取上周数据，生成分析报告"
+    enabled: true
+
+  - name: "异常数据检测"
+    id: "anomaly_detection"
+    soldier: "staff_analyst"
+    schedule: "0 */4 * * *"  # 每4小时
+    description: "检测关键指标的异常波动"
+    enabled: false  # 暂未启用
+
+  # ========== 后勤兵任务 ==========
+  - name: "数据库自动备份"
+    id: "db_backup"
+    soldier: "logistics_scheduler"
+    schedule: "0 3 * * *"  # 每天3:00
+    description: "备份所有数据库到安全存储"
+    enabled: true
+
+  - name: "临时文件清理"
+    id: "temp_cleanup"
+    soldier: "logistics_scheduler"
+    schedule: "0 2 * * 0"  # 每周日2:00
+    description: "清理超过24小时的临时文件"
+    enabled: true
+
+  - name: "周报邮件发送"
+    id: "weekly_email"
+    soldier: "logistics_scheduler"
+    schedule: "0 9 * * 1"  # 每周一9:00
+    description: "自动发送工作总结邮件"
+    enabled: false  # 需配置SMTP后启用
+
+# ========== 监控目标配置 ==========
+monitoring_targets:
+  - name: "36氪AI频道"
+    url: "https://36kr.com/newsflashes"
+    type: "static"
+
+  - name: "机器之心"
+    url: "https://www.jiqizhixin.com/rss"
+    type: "rss"
+
+  - name: "GitHub Trending Python"
+    url: "https://github.com/trending/python?since=daily"
+    type: "static"
+
+# ========== 知识库配置 ==========
+knowledge_base:
+  directories:
+    - "./data/knowledge/methodology"
+    - "./data/knowledge/reports"
+    - "./data/knowledge/cases"
+  auto_reload: false  # 是否自动重新加载
+  chunk_size: 500    # 切片大小（字符）

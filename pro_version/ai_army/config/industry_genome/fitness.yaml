@@ -1,0 +1,255 @@
+# 健身运动行业基因库
+id: fitness
+name: 健身运动
+icon: "💪"
+description: "健身房、瑜伽馆、游泳馆、拳馆、舞蹈室等"
+subcategories:
+  - 综合健身房
+  - 瑜伽/普拉提
+  - 私教工作室
+  - 游泳馆
+  - 搏击/拳馆
+  - 舞蹈/形体
+  - 羽毛球/篮球馆
+  - 攀岩/极限运动
+
+default_search_radius: 3000
+
+amap_poi_type: "080000"
+tencent_poi_type: "运动健身"
+
+kpi_formulas:
+  活跃会员数:
+    formula: "近30天有到店记录的会员数"
+    description: "最近30天有多少人来过"
+    unit: 人
+    importance: critical
+    is_raw: true
+  会员续费率:
+    formula: "到期续费会员 / 到期会员总数 * 100"
+    description: "会员到期后，有多少比例续费了"
+    unit: "%"
+    importance: critical
+    raw_inputs:
+      - key: 到期会员数
+        question: "最近有多少会员到期了？"
+        placeholder: "比如：100"
+        unit: 人
+      - key: 续费会员数
+        question: "其中多少人续费了？"
+        placeholder: "比如：60"
+        unit: 人
+    compute_expr: "续费会员数 / 到期会员数 * 100"
+  出勤率:
+    formula: "会员月均到店次数"
+    description: "会员平均每月来几次"
+    unit: 次/月
+    importance: high
+    is_raw: true
+  私教转化率:
+    formula: "私教课会员数 / 总活跃会员数 * 100"
+    description: "10个会员里有多少人买了私教课"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 私教会员数
+        question: "有多少会员买了私教课？"
+        placeholder: "比如：30"
+        unit: 人
+    compute_expr: "私教会员数 / 活跃会员数 * 100"
+  客单价:
+    formula: "总营收 / 付费会员数"
+    description: "每个会员平均花多少钱"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 总营收
+        question: "这个月总收入是多少？"
+        placeholder: "比如：80000"
+        unit: 元
+      - key: 付费会员数
+        question: "这个月有多少会员在交费？"
+        placeholder: "比如：200"
+        unit: 人
+    compute_expr: "总营收 / 付费会员数"
+  获客成本:
+    formula: "营销总支出 / 新会员数"
+    description: "花多少钱才能带来一个新会员"
+    unit: 元/人
+    importance: high
+    raw_inputs:
+      - key: 营销支出
+        question: "这个月做推广、广告一共花了多少钱？"
+        placeholder: "比如：5000"
+        unit: 元
+      - key: 新会员数
+        question: "这个月来了多少新会员？"
+        placeholder: "比如：25"
+        unit: 人
+    compute_expr: "营销支出 / 新会员数"
+  坪效:
+    formula: "营收 / 营业面积(㎡)"
+    description: "每平米健身房能赚多少钱"
+    unit: 元/㎡
+    importance: high
+    raw_inputs:
+      - key: 总营收2
+        question: "这个月总收入是多少？"
+        placeholder: "比如：80000"
+        unit: 元
+      - key: 营业面积
+        question: "健身房面积有多大？（平方米）"
+        placeholder: "比如：300"
+        unit: ㎡
+    compute_expr: "总营收2 / 营业面积"
+  流失率:
+    formula: "月度流失会员数 / 月初会员总数 * 100"
+    description: "这个月有多少会员不来了"
+    unit: "%"
+    importance: critical
+    raw_inputs:
+      - key: 月初会员数
+        question: "这个月初一共有多少会员？"
+        placeholder: "比如：500"
+        unit: 人
+      - key: 流失会员数
+        question: "这个月流失了多少会员？"
+        placeholder: "比如：50"
+        unit: 人
+    compute_expr: "流失会员数 / 月初会员数 * 100"
+  器械使用率:
+    formula: "高峰时段器械占用比例"
+    description: "高峰时段器械有多少被占用了"
+    unit: "%"
+    importance: medium
+    is_raw: true
+  团课满员率:
+    formula: "团课预约人数 / 团课容量 * 100"
+    description: "团课平均有多少人参加"
+    unit: "%"
+    importance: medium
+    raw_inputs:
+      - key: 团课容量
+        question: "团课最多能容纳多少人？"
+        placeholder: "比如：30"
+        unit: 人
+      - key: 预约人数
+        question: "平均每节课有多少人预约？"
+        placeholder: "比如：24"
+        unit: 人
+    compute_expr: "预约人数 / 团课容量 * 100"
+
+benchmarks:
+  会员续费率:
+    excellent: 65
+    good: 50
+    average: 35
+    poor: 20
+  出勤率:
+    excellent: 12
+    good: 8
+    average: 5
+    poor: 3
+  私教转化率:
+    excellent: 25
+    good: 15
+    average: 8
+    poor: 4
+  流失率:
+    excellent: 3
+    good: 5
+    average: 8
+    poor: 12
+  坪效:
+    excellent: 1500
+    good: 1000
+    average: 600
+    poor: 350
+
+red_flags:
+  - metric: 流失率
+    threshold: "> 12"
+    severity: critical
+    description: "月度流失超过12%说明核心体验或服务出现系统性问题"
+  - metric: 会员续费率
+    threshold: "< 20"
+    severity: critical
+    description: "续费率极低，获客成本无法被LTV覆盖"
+  - metric: 出勤率
+    threshold: "< 3"
+    severity: high
+    description: "出勤率低意味着会员粘性差，即将大量流失"
+  - metric: 私教转化率
+    threshold: "< 4"
+    severity: medium
+    description: "私教转化过低说明教练销售能力或信任度不足"
+
+competitor_focus:
+  - "周边3km健身场馆"
+  - "团购/点评平台价格对比"
+  - "新馆开业及装修升级"
+  - "竞品课程更新与教练流动"
+  - "会员评价变化趋势"
+  - "竞品促销力度（年卡/月卡）"
+
+marketing_scenarios:
+  - name: "成果展示"
+    icon: "📸"
+    desc: "会员身材变化对比"
+  - name: "试课/体验"
+    icon: "🎫"
+    desc: "免费体验课邀约方案"
+  - name: "限时卡种"
+    icon: "⏰"
+    desc: "限量/限时会员卡推广"
+  - name: "会员故事"
+    icon: "🌟"
+    desc: "会员励志故事分享"
+  - name: "教练IP打造"
+    icon: "🎯"
+    desc: "教练个人品牌内容"
+  - name: "活动/赛事"
+    icon: "🏆"
+    desc: "馆内挑战赛/活动宣传"
+  - name: "短视频训练"
+    icon: "🎬"
+    desc: "15秒健身干货短视频"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行诊断分析：
+
+    ## 行业基准（{store_type}）
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+    ## 分析规则
+    1. 重点关注续费率、流失率、出勤率三大核心指标
+    2. 归因到教练/课程/时段层面
+    3. 分析LTV/CAC比值和会员生命周期健康度
+    4. 建议必须可量化
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请对以下健身经营数据进行因果归因分析：
+
+    ## 分析框架
+    1. **现象识别**：哪些指标出现异常？
+    2. **因果链**：出勤率→私教转化→续费率→流失率→营收的完整链条
+    3. **根因定位**：追溯到教练/课程/设施/服务层面
+    4. **影响量化**：每个根因对会员流失和营收的量化影响
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "有哪些器械/课程？"
+  - "月卡/年卡多少钱？"
+  - "有免费体验吗？"
+  - "营业时间是？"
+  - "教练资质怎么样？"
+  - "浴室/停车方便吗？"
+  - "人多的时候要排队吗？"

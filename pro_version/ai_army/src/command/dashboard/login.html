@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI军团 PRO · AI店长指挥台</title>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --panel: #12121a;
+  --card: rgba(24, 24, 32, 0.88);
+  --accent: #e8b64c;
+  --accent2: #f7dc8d;
+  --danger: #ff5c5c;
+  --success: #46d48a;
+  --text: #ece9e1;
+  --text1: #cbc5b5;
+  --text2: #8f8a7c;
+  --border: rgba(232, 182, 76, 0.16);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  background:
+    radial-gradient(1200px 500px at 85% -10%, rgba(232, 182, 76, 0.08), transparent 60%),
+    radial-gradient(900px 400px at -10% 110%, rgba(70, 212, 138, 0.05), transparent 55%),
+    linear-gradient(180deg, #0a0a0f 0%, #0d0d14 100%);
+  background-attachment: fixed;
+  color: var(--text); min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(232, 182, 76, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 182, 76, 0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 30%, transparent 75%);
+}
+body::after {
+  content: ''; position: fixed; top: 0; left: 0; width: 220px; height: 2px;
+  z-index: 9999; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(247, 220, 141, 0.85), transparent);
+  animation: scanline 7s linear infinite;
+}
+@keyframes scanline {
+  0% { transform: translateX(-220px); }
+  100% { transform: translateX(calc(100vw + 220px)); }
+}
+.wrap {
+  position: relative; z-index: 1; width: 920px; max-width: 94vw;
+  display: flex; min-height: 560px;
+  background: linear-gradient(180deg, rgba(18, 18, 26, 0.92), rgba(10, 10, 15, 0.96));
+  border: 1px solid var(--border); border-radius: 18px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(247, 220, 141, 0.08);
+  overflow: hidden;
+}
+.wrap::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #b8860b, #f7dc8d, #b8860b); z-index: 2;
+}
+/* ── 左侧品牌区 ── */
+.brand {
+  width: 380px; flex-shrink: 0; padding: 48px 36px; position: relative;
+  background:
+    radial-gradient(500px 300px at 20% 0%, rgba(232, 182, 76, 0.12), transparent 60%),
+    linear-gradient(180deg, rgba(17, 17, 24, 0.9), rgba(10, 10, 15, 0.9));
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+}
+.brand .logo-badge { display: flex; align-items: center; gap: 14px; margin-bottom: 36px; }
+.brand .logo-icon {
+  width: 52px; height: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 26px;
+  background: linear-gradient(160deg, rgba(232, 182, 76, 0.2), rgba(232, 182, 76, 0.05));
+  border: 1px solid rgba(232, 182, 76, 0.45); border-radius: 12px;
+  box-shadow: inset 0 0 16px rgba(232, 182, 76, 0.25), 0 0 12px rgba(232, 182, 76, 0.15);
+}
+.brand .logo-text h1 { font-size: 24px; color: #fff; font-weight: 700; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+.brand .pro-tag {
+  font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #171003;
+  background: linear-gradient(135deg, #f7dc8d, #e8b64c); padding: 3px 8px; border-radius: 4px;
+  box-shadow: 0 0 12px rgba(232, 182, 76, 0.5);
+}
+.brand .logo-text span { display: block; font-size: 11px; color: var(--accent2); letter-spacing: 3px; margin-top: 4px; text-transform: uppercase; opacity: 0.9; }
+.brand .slogan { font-size: 26px; line-height: 1.5; color: #fff; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
+.brand .slogan em { font-style: normal; color: var(--accent); text-shadow: 0 0 18px rgba(232, 182, 76, 0.45); }
+.brand .desc { font-size: 13px; color: var(--text2); line-height: 1.9; margin-bottom: 30px; }
+.pro-list { display: flex; flex-direction: column; gap: 12px; }
+.pro-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  background: rgba(232, 182, 76, 0.05); border: 1px solid var(--border); border-radius: 10px;
+  transition: .25s;
+}
+.pro-item:hover { background: rgba(232, 182, 76, 0.1); transform: translateX(4px); }
+.pro-item .ic { font-size: 18px; width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(232, 182, 76, 0.15); border: 1px solid rgba(232, 182, 76, 0.3); }
+.pro-item .t { font-size: 13px; color: var(--text); font-weight: 600; }
+.pro-item .d { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.brand .foot { margin-top: auto; font-size: 11px; color: var(--text2); letter-spacing: 1px; opacity: 0.7; }
+/* ── 右侧表单区 ── */
+.form-side { flex: 1; padding: 48px 44px; display: flex; flex-direction: column; justify-content: center; }
+.tabs { display: flex; margin-bottom: 30px; border-bottom: 1px solid var(--border); gap: 8px; }
+.tab {
+  padding: 12px 20px; text-align: center; cursor: pointer; color: var(--text2);
+  background: none; border: none; font-size: 15px; transition: .2s; font-weight: 500;
+  border-bottom: 2px solid transparent; position: relative; letter-spacing: 1px;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent2); border-bottom-color: var(--accent); text-shadow: 0 0 14px rgba(232, 182, 76, 0.35); font-weight: 600; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; color: var(--text1); font-size: 13px; margin-bottom: 8px; letter-spacing: 0.5px; }
+.form-group label i { font-style: normal; color: var(--danger); }
+.form-group input {
+  width: 100%; padding: 12px 16px; border-radius: 8px;
+  border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+  color: var(--text); font-size: 14px; outline: none; transition: .2s; letter-spacing: 0.5px;
+}
+.form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232, 182, 76, 0.12), inset 0 0 12px rgba(232, 182, 76, 0.04); background: rgba(255,255,255,0.05); }
+.form-group input::placeholder { color: rgba(143, 138, 124, 0.5); }
+.btn {
+  width: 100%; padding: 13px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 15px; font-weight: 700; transition: .25s; margin-top: 10px; letter-spacing: 4px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #b8860b, #e8b64c 55%, #f7dc8d);
+  color: #171003; position: relative; overflow: hidden;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(232, 182, 76, 0.35); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary::after {
+  content: ''; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  animation: btnShine 3.2s ease-in-out infinite;
+}
+@keyframes btnShine { 0%, 60% { left: -80%; } 100% { left: 130%; } }
+.error { color: var(--danger); font-size: 13px; text-align: center; margin-top: 14px; min-height: 20px; }
+.success { color: var(--success); font-size: 13px; text-align: center; margin-top: 14px; min-height: 20px; }
+.link-row { text-align: center; margin-top: 18px; }
+.link-row a { color: var(--text2); font-size: 12px; text-decoration: none; transition: .2s; letter-spacing: 0.5px; }
+.link-row a:hover { color: var(--accent); }
+.hidden { display: none; }
+.form-tip { text-align: center; font-size: 12px; color: var(--text2); margin-top: 22px; letter-spacing: 0.5px; }
+.form-tip b { color: var(--accent2); font-weight: 600; }
+@media (max-width: 820px) {
+  .brand { display: none; }
+  .form-side { padding: 40px 28px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- 左侧品牌区 -->
+  <div class="brand">
+    <div class="logo-badge">
+      <div class="logo-icon">🎖️</div>
+      <div class="logo-text">
+        <h1>AI军团 <span class="pro-tag">PRO</span></h1>
+        <span>AI STORE MANAGER CONSOLE</span>
+      </div>
+    </div>
+    <div class="slogan">你的 24 小时<br><em>AI 店长指挥台</em></div>
+    <div class="desc">黑金战术级店铺管理系统，9 名 AI 战士就位，覆盖营销获客、内容创作、视频探店、数据决策全链路。</div>
+    <div class="pro-list">
+      <div class="pro-item">
+        <div class="ic">🧠</div>
+        <div><div class="t">AI 店长 · 主代理</div><div class="d">统一编排，智能调度全域任务</div></div>
+      </div>
+      <div class="pro-item">
+        <div class="ic">⚙️</div>
+        <div><div class="t">编排引擎 · 三层架构</div><div class="d">主代理 + 编排 + 质检/审批</div></div>
+      </div>
+      <div class="pro-item">
+        <div class="ic">🛡️</div>
+        <div><div class="t">质检 · 审批闭环</div><div class="d">关键动作人工把关，质量可控</div></div>
+      </div>
+      <div class="pro-item">
+        <div class="ic">🚀</div>
+        <div><div class="t">9 名 AI 战士就位</div><div class="d">营销 · 内容 · 视频 · 数据全链路</div></div>
+      </div>
+    </div>
+    <div class="foot">AI ARMY · PRO EDITION</div>
+  </div>
+
+  <!-- 右侧表单区 -->
+  <div class="form-side">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login')">登 录</button>
+      <button class="tab" onclick="switchTab('register')">注册商家</button>
+    </div>
+
+    <!-- 登录表单 -->
+    <div id="login-form">
+      <div class="form-group">
+        <label>登录账号</label>
+        <input type="text" id="login-account" placeholder="请输入账号">
+      </div>
+      <div class="form-group">
+        <label>密码</label>
+        <input type="password" id="login-password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')login()">
+      </div>
+      <button class="btn btn-primary" onclick="login()">登 录</button>
+    </div>
+
+    <!-- 注册表单 -->
+    <div id="register-form" class="hidden">
+      <div class="form-group">
+        <label>商家名称 <i>*</i></label>
+        <input type="text" id="reg-name" placeholder="如：茶百道金牛镇店">
+      </div>
+      <div class="form-group">
+        <label>登录账号 <i>*</i></label>
+        <input type="text" id="reg-account" placeholder="字母/数字组合">
+      </div>
+      <div class="form-group">
+        <label>密码 <i>*</i></label>
+        <input type="password" id="reg-password" placeholder="至少6位">
+      </div>
+      <div class="form-group">
+        <label>联系电话</label>
+        <input type="text" id="reg-phone" placeholder="选填">
+      </div>
+      <div class="form-group">
+        <label>所在地区</label>
+        <input type="text" id="reg-region" placeholder="如：云南大理宾川县">
+      </div>
+      <button class="btn btn-primary" onclick="register()">注 册</button>
+    </div>
+
+    <div id="msg" class="error"></div>
+
+    <div class="form-tip">已注册商家：<b>test001</b> 可直接登录体验</div>
+    <div class="link-row">
+      <a href="/admin-login" target="_blank">平台管理员入口 →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+var mode = 'login';
+function switchTab(tab) {
+  mode = tab;
+  document.querySelectorAll('.tab').forEach(function(t,i){
+    t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1));
+  });
+  document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('msg').textContent = '';
+}
+
+function setMsg(text, type) {
+  var el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = type || 'error';
+}
+
+async function login() {
+  var acc = document.getElementById('login-account').value.trim();
+  var pwd = document.getElementById('login-password').value.trim();
+  if (!acc || !pwd) return setMsg('请填写账号和密码', 'error');
+
+  var fd = new FormData();
+  fd.append('account', acc); fd.append('password', pwd);
+
+  try {
+    var r = await fetch('/auth/login', { method: 'POST', body: fd });
+    var d = await r.json();
+    if (r.ok && d.status === 'success') {
+      localStorage.setItem('ai_army_token', d.data.token);
+      localStorage.setItem('ai_army_name', d.data.name);
+      localStorage.setItem('ai_army_tenant', d.data.tenant_id);
+      setMsg('登录成功，跳转中...', 'success');
+      setTimeout(function(){ location.href = '/dashboard'; }, 500);
+    } else {
+      setMsg(d.detail || d.message || '登录失败');
+    }
+  } catch(e) { setMsg('网络错误，请重试'); }
+}
+
+async function register() {
+  var name = document.getElementById('reg-name').value.trim();
+  var acc = document.getElementById('reg-account').value.trim();
+  var pwd = document.getElementById('reg-password').value.trim();
+  if (!name || !acc || !pwd) return setMsg('请填写必填项（名称、账号、密码）');
+  if (pwd.length < 6) return setMsg('密码至少6位');
+
+  var fd = new FormData();
+  fd.append('name', name); fd.append('account', acc); fd.append('password', pwd);
+  fd.append('phone', document.getElementById('reg-phone').value.trim());
+  fd.append('region', document.getElementById('reg-region').value.trim());
+
+  try {
+    var r = await fetch('/auth/register', { method: 'POST', body: fd });
+    var d = await r.json();
+    if (r.ok && d.status === 'success') {
+      localStorage.setItem('ai_army_token', d.data.token);
+      localStorage.setItem('ai_army_name', d.data.name);
+      localStorage.setItem('ai_army_tenant', d.data.tenant_id);
+      setMsg('注册成功，跳转中...', 'success');
+      setTimeout(function(){ location.href = '/dashboard'; }, 500);
+    } else {
+      setMsg(d.detail || d.message || '注册失败');
+    }
+  } catch(e) { setMsg('网络错误，请重试'); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+# 生活服务行业基因库
+id: service
+name: 生活服务
+icon: "💇"
+description: "美容美发、美甲、按摩SPA、洗衣、摄影、宠物等"
+subcategories:
+  - 美容美发
+  - 美甲美睫
+  - 皮肤管理
+  - 按摩SPA
+  - 洗车养护
+  - 干洗/洗衣
+  - 摄影工作室
+  - 宠物服务
+  - 家政服务
+  - 维修服务
+  - 搬家物流
+  - 婚庆策划
+
+default_search_radius: 3000
+
+amap_poi_type: "070000"
+tencent_poi_type: "生活服务"
+
+kpi_formulas:
+  日营收:
+    formula: "sum(当日所有服务收入)"
+    description: "今天一天总共收了多少钱"
+    unit: 元
+    importance: critical
+    is_raw: true
+  客单价:
+    formula: "日营收 / 服务客数"
+    description: "每个客人平均消费多少钱"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 服务客数
+        question: "今天一共服务了多少位客人？"
+        placeholder: "比如：20"
+        unit: 人
+    compute_expr: "日营收 / 服务客数"
+  预约率:
+    formula: "预约到店客数 / 总服务客数 * 100"
+    description: "有多少客人是提前预约的"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 预约客数
+        question: "今天有多少客人是提前预约的？"
+        placeholder: "比如：15"
+        unit: 人
+      - key: 总客数
+        question: "今天一共来了多少客人？"
+        placeholder: "比如：20"
+        unit: 人
+    compute_expr: "预约客数 / 总客数 * 100"
+  日均服务人次:
+    formula: "月服务总人次 / 营业天数"
+    description: "平均每天能接待多少客人"
+    unit: 人
+    importance: high
+    raw_inputs:
+      - key: 月总人次
+        question: "这个月一共服务了多少人次？"
+        placeholder: "比如：500"
+        unit: 人次
+      - key: 营业天数
+        question: "这个月营业了多少天？"
+        placeholder: "比如：26"
+        unit: 天
+    compute_expr: "月总人次 / 营业天数"
+  会员续费率:
+    formula: "到期后续费会员数 / 到期会员总数 * 100"
+    description: "会员到期后，有多少比例续费了"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 到期会员数
+        question: "最近有多少会员到期了？"
+        placeholder: "比如：50"
+        unit: 人
+      - key: 续费会员数
+        question: "其中多少人续费了？"
+        placeholder: "比如：30"
+        unit: 人
+    compute_expr: "续费会员数 / 到期会员数 * 100"
+  客诉率:
+    formula: "投诉顾客数 / 总服务顾客数 * 100"
+    description: "100个客人里，有多少个投诉"
+    unit: "%"
+    importance: medium
+    raw_inputs:
+      - key: 投诉人数
+        question: "最近收到了多少个投诉？"
+        placeholder: "比如：2"
+        unit: 个
+      - key: 服务总客数2
+        question: "同期一共服务了多少客人？"
+        placeholder: "比如：100"
+        unit: 人
+    compute_expr: "投诉人数 / 服务总客数2 * 100"
+  服务满意度:
+    formula: "顾客评价平均分"
+    description: "客人打分平均是多少"
+    unit: 分
+    importance: high
+    is_raw: true
+  线上曝光量:
+    formula: "美团/大众点评页面浏览量"
+    description: "线上平台被浏览了多少次"
+    unit: 次
+    importance: medium
+    is_raw: true
+  技师人效:
+    formula: "技师服务营收 / 技师人数"
+    description: "每个技师平均能做多少业绩"
+    unit: 元/人
+    importance: high
+    raw_inputs:
+      - key: 技师总业绩
+        question: "所有技师加起来的服务收入是多少？"
+        placeholder: "比如：8000"
+        unit: 元
+      - key: 技师人数
+        question: "一共有几位技师？"
+        placeholder: "比如：8"
+        unit: 人
+    compute_expr: "技师总业绩 / 技师人数"
+  新客占比:
+    formula: "首次到店客数 / 总服务客数 * 100"
+    description: "今天有多少客人是第一次来的"
+    unit: "%"
+    importance: medium
+    raw_inputs:
+      - key: 新客数
+        question: "今天有多少客人是第一次来的？"
+        placeholder: "比如：8"
+        unit: 人
+      - key: 总客数3
+        question: "今天一共来了多少客人？"
+        placeholder: "比如：20"
+        unit: 人
+    compute_expr: "新客数 / 总客数3 * 100"
+
+benchmarks:
+  客单价:
+    economy: 50
+    mid: 120
+    premium: 300
+  预约率:
+    excellent: 70
+    good: 50
+    average: 30
+    poor: 15
+  会员续费率:
+    excellent: 70
+    good: 50
+    average: 35
+    poor: 20
+  服务满意度:
+    excellent: 4.8
+    good: 4.5
+    average: 4.2
+    poor: 4.0
+  技师人效:
+    excellent: 800
+    good: 500
+    average: 350
+    poor: 200
+
+red_flags:
+  - metric: 会员续费率
+    threshold: "< 20"
+    severity: critical
+    description: "续费率低于20%说明核心服务和会员体系存在严重问题"
+  - metric: 客诉率
+    threshold: "> 5"
+    severity: high
+    description: "客诉率超过5%会严重影响口碑和线上评分"
+  - metric: 服务满意度
+    threshold: "< 4.0"
+    severity: high
+    description: "满意度低将导致客户流失和新客获取困难"
+  - metric: 预约率
+    threshold: "< 15"
+    severity: medium
+    description: "预约率低说明缺乏客户粘性和提前锁定能力"
+
+competitor_focus:
+  - "周边3km同类型服务店"
+  - "团购平台同品类排名与评分"
+  - "竞品定价与套餐变化"
+  - "新店开张与装修升级"
+  - "差评预警及口碑变化"
+  - "竞品促销活动力度"
+
+marketing_scenarios:
+  - name: "服务种草"
+    icon: "📸"
+    desc: "服务效果展示文案+图片"
+  - name: "新客优惠"
+    icon: "🎁"
+    desc: "首次体验优惠活动"
+  - name: "会员福利"
+    icon: "👑"
+    desc: "会员专属活动通知"
+  - name: "节庆活动"
+    icon: "🎉"
+    desc: "节日限定套餐"
+  - name: "老带新裂变"
+    icon: "🔗"
+    desc: "老客推荐新客奖励方案"
+  - name: "好评引导"
+    icon: "⭐"
+    desc: "引导好评+差评回复模板"
+  - name: "小红书探店"
+    icon: "📕"
+    desc: "小红书探店种草文案"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行诊断分析：
+
+    ## 行业基准（{store_type}）
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+    ## 分析规则
+    1. 重点关注预约率、续费率、技师人效三大服务行业核心指标
+    2. 归因到具体的服务项目或技师
+    3. 建议必须可量化
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请对以下服务经营数据进行因果归因分析：
+
+    ## 分析框架
+    1. **现象识别**：哪些指标出现异常？
+    2. **因果链**：技师水平→服务满意度→续费率→稳定营收的逻辑链
+    3. **根因定位**：追溯到服务项目/技师/时段级别
+    4. **影响量化**：估算每个根因对会员流失和营收的影响
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "需要提前预约吗？"
+  - "做一次大概多久？"
+  - "有哪些服务项目？价格多少？"
+  - "第一次来有什么优惠？"
+  - "可以带朋友一起来吗？"
+  - "不满意可以重做吗？"
+  - "有停车位吗？"

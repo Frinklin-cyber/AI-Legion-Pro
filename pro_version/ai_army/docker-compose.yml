@@ -1,0 +1,100 @@
+# AI军团 - Docker Compose 一键部署
+version: "3.8"
+
+services:
+  # ========== 指挥中心 ==========
+  command-center:
+    build: .
+    container_name: ai-army-command
+    ports:
+      - "8080:8080"
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-deepseek-chat}
+      - ARM_COMMAND_API_KEY=${ARM_COMMAND_API_KEY:-}
+      - WECOM_WEBHOOK_URL=${WECOM_WEBHOOK_URL:-}
+      - FEISHU_WEBHOOK_URL=${FEISHU_WEBHOOK_URL:-}
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMA_PERSIST_DIR=/app/data/chroma_db
+      - AMAP_API_KEY=${AMAP_API_KEY:-}
+      - BAIDU_MAP_AK=${BAIDU_MAP_AK:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - DASHBOARD_HOST=0.0.0.0
+      - DASHBOARD_PORT=8080
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ai-army-net
+
+  # ========== Redis ==========
+  redis:
+    image: redis:7-alpine
+    container_name: ai-army-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - ai-army-net
+
+  # ========== Celery Worker ==========
+  celery-worker:
+    build: .
+    container_name: ai-army-worker
+    command: celery -A src.logistics.task_scheduler worker --loglevel=info --concurrency=4
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMA_PERSIST_DIR=/app/data/chroma_db
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ai-army-net
+
+  # ========== Celery Beat（定时任务） ==========
+  celery-beat:
+    build: .
+    container_name: ai-army-beat
+    command: celery -A src.logistics.task_scheduler beat --loglevel=info
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - ai-army-net
+
+networks:
+  ai-army-net:
+    driver: bridge
+
+volumes:
+  redis-data:

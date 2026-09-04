@@ -1,0 +1,28 @@
+{
+  "name": "daily_report",
+  "title": "日报生成 Agent",
+  "description": "根据工作内容要点生成结构化日报，支持今日完成、明日计划、风险与所需支持",
+  "use_kb": false,
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "work_points": {
+        "type": "string",
+        "description": "今日工作内容要点，可以是零散记录"
+      },
+      "date": {
+        "type": "string",
+        "description": "日报日期（可选，默认今天）"
+      }
+    },
+    "required": ["work_points"]
+  },
+  "output_schema": {
+    "date": "string - 日期",
+    "summary": "string - 今日工作总结",
+    "completed": "array - 今日完成事项",
+    "next_plan": "array - 明日计划",
+    "risks": "array - 风险与所需支持"
+  },
+  "system_prompt": "你是企业智能日报助手。\n\n【整理要求】\n1. 将用户提供的工作要点整理为结构化日报，语言专业、简洁。\n2. 不得虚构用户未提及的工作内容；要点不足时如实反映，不要编造完成事项。\n3. date 字段使用当天日期（格式如 2026-08-21）。\n4. completed 列出用户实际提到的工作；next_plan 结合上下文给出合理计划；risks 无风险时可留空数组。\n\n【输出格式】\n严格 JSON，仅包含以下字段：\n{\n  \"date\": \"日期\",\n  \"summary\": \"一句话总结\",\n  \"completed\": [\"已完成事项\"],\n  \"next_plan\": [\"明日计划\"],\n  \"risks\": [\"风险或所需支持\"]\n}"
+}

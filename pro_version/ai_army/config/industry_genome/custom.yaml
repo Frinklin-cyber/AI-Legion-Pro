@@ -1,0 +1,135 @@
+# 自定义万能模板基因库
+id: custom
+name: 自定义店铺
+icon: "🏠"
+description: "任何你能想到的店铺类型，自由配置KPI、知识库、营销场景"
+subcategories: []
+
+default_search_radius: 2000
+
+amap_poi_type: ""
+tencent_poi_type: ""
+
+kpi_formulas:
+  日营收:
+    formula: "sum(当日所有收入)"
+    description: "今天一天总共赚了多少钱"
+    unit: 元
+    importance: critical
+    is_raw: true
+  客单价:
+    formula: "营收 / 客户数"
+    description: "每个客户平均消费多少钱"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 客户数
+        question: "今天一共有多少个客户？"
+        placeholder: "比如：30"
+        unit: 人
+    compute_expr: "日营收 / 客户数"
+  客户满意度:
+    formula: "顾客评分平均值"
+    description: "客人对你的打分平均是多少"
+    unit: 分
+    importance: high
+    is_raw: true
+  复购率:
+    formula: "回头客数 / 总客户数 * 100"
+    description: "回头客占总客户的比例"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 总客户数
+        question: "这段时间一共有多少客户？"
+        placeholder: "比如：100"
+        unit: 人
+      - key: 回头客数
+        question: "其中有多少是回头客？"
+        placeholder: "比如：35"
+        unit: 人
+    compute_expr: "回头客数 / 总客户数 * 100"
+  获客成本:
+    formula: "营销总支出 / 新客户数"
+    description: "花多少钱才能带来一个新客户"
+    unit: 元/人
+    importance: high
+    raw_inputs:
+      - key: 营销支出
+        question: "这段时间推广、广告花了多少钱？"
+        placeholder: "比如：5000"
+        unit: 元
+      - key: 新客户数
+        question: "这段时间来了多少新客户？"
+        placeholder: "比如：25"
+        unit: 人
+    compute_expr: "营销支出 / 新客户数"
+  线上曝光量:
+    formula: "线上平台浏览量"
+    description: "线上平台被浏览了多少次"
+    unit: 次
+    importance: medium
+    is_raw: true
+
+benchmarks:
+  客单价: {}
+  客户满意度:
+    excellent: 4.8
+    good: 4.5
+    average: 4.2
+    poor: 4.0
+  复购率:
+    excellent: 50
+    good: 35
+    average: 20
+    poor: 10
+
+red_flags:
+  - metric: 复购率
+    threshold: "< 10"
+    severity: high
+    description: "复购率过低说明客户满意度或粘性不足"
+  - metric: 客户满意度
+    threshold: "< 4.0"
+    severity: high
+    description: "客户满意度低将严重影响口碑和新客获取"
+
+competitor_focus:
+  - "周边同类型商家"
+  - "线上平台竞品"
+  - "价格/活动变化"
+
+marketing_scenarios:
+  - name: "产品/服务推荐"
+    icon: "📢"
+    desc: "核心产品服务推广"
+  - name: "促销活动"
+    icon: "🏷️"
+    desc: "限时优惠活动方案"
+  - name: "客户案例"
+    icon: "🌟"
+    desc: "客户使用效果展示"
+  - name: "新品/新服务上线"
+    icon: "🆕"
+    desc: "新品发布推广"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于经营数据进行分析诊断。
+
+    ## 行业基准
+    {benchmarks_context}
+
+  attribution: |
+    你是经营诊断的归因分析专家。
+    请基于因果框架分析根因。
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "有什么产品/服务？"
+  - "价格是多少？"
+  - "营业时间是？"
+  - "有什么优惠？"

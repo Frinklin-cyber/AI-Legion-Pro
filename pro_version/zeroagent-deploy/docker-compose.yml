@@ -1,0 +1,41 @@
+# ZEROagent 企业知识大脑 PoC - 一键部署
+# 使用: docker compose up --build  →  http://localhost:8000
+#
+# 首次启动后需拉取本地模型（数据不出域，模型也跑在本地容器内）:
+#   docker compose exec app python scripts/pull_models.py
+# 或手动执行:
+#   docker compose exec ollama ollama pull nomic-embed-text
+#   docker compose exec ollama ollama pull qwen2.5:7b
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
+
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - EMBED_MODEL=nomic-embed-text
+      - LLM_MODEL=qwen2.5:7b
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  ollama_data:

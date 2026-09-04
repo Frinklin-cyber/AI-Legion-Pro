@@ -1,0 +1,199 @@
+# 汽车服务行业基因库
+id: auto
+name: 汽车服务
+icon: "🚗"
+description: "4S店、汽修、洗车美容、二手车、租车等"
+subcategories:
+  - 4S店/品牌授权
+  - 综合汽修
+  - 洗车美容
+  - 轮胎/改装
+  - 二手车交易
+  - 汽车租赁
+  - 充电/换电站
+
+default_search_radius: 3000
+
+amap_poi_type: "010000"
+tencent_poi_type: "汽车"
+
+kpi_formulas:
+  日营收:
+    formula: "sum(当日所有服务+配件收入)"
+    description: "今天一天总共赚了多少钱"
+    unit: 元
+    importance: critical
+    is_raw: true
+  日均进店台次:
+    formula: "月度进店台次 / 营业天数"
+    description: "平均每天有多少台车来"
+    unit: 台
+    importance: high
+    is_raw: true
+  客单价:
+    formula: "日营收 / 进店台次"
+    description: "每台车平均消费多少钱"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 进店台次
+        question: "今天一共有多少台车进来？"
+        placeholder: "比如：15"
+        unit: 台
+    compute_expr: "日营收 / 进店台次"
+  配件毛利率:
+    formula: "(配件收入 - 配件成本) / 配件收入 * 100"
+    description: "卖配件赚的钱占配件收入的比例"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 配件收入
+        question: "今天配件一共卖了多少钱？"
+        placeholder: "比如：2000"
+        unit: 元
+      - key: 配件成本
+        question: "这些配件的进货成本是多少？"
+        placeholder: "比如：1400"
+        unit: 元
+    compute_expr: "(配件收入 - 配件成本) / 配件收入 * 100"
+  工位利用率:
+    formula: "实际使用工位时间 / 可用工位总时间 * 100"
+    description: "工位有多少时间在工作"
+    unit: "%"
+    importance: high
+    is_raw: true
+  预约率:
+    formula: "预约到店台次 / 总进店台次 * 100"
+    description: "有多少车是预约来的"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 预约台次
+        question: "今天有多少台是提前预约的？"
+        placeholder: "比如：10"
+        unit: 台
+      - key: 总进店台次
+        question: "今天一共有多少台车进来？"
+        placeholder: "比如：15"
+        unit: 台
+    compute_expr: "预约台次 / 总进店台次 * 100"
+  返修率:
+    formula: "7天内返修台次 / 总维修台次 * 100"
+    description: "修过的车有多少在7天内又回来返修了"
+    unit: "%"
+    importance: critical
+    raw_inputs:
+      - key: 总维修台次
+        question: "这段时间一共修了多少台车？"
+        placeholder: "比如：100"
+        unit: 台
+      - key: 返修台次
+        question: "其中有多少台7天内又回来修了？"
+        placeholder: "比如：5"
+        unit: 台
+    compute_expr: "返修台次 / 总维修台次 * 100"
+  客户留存率:
+    formula: "老客户回厂台次 / 总进店台次 * 100"
+    description: "老客户占总进店的比例"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 老客户台次
+        question: "今天有多少台是老客户的车？"
+        placeholder: "比如：8"
+        unit: 台
+      - key: 进店总台次
+        question: "今天一共进来多少台车？"
+        placeholder: "比如：15"
+        unit: 台
+    compute_expr: "老客户台次 / 进店总台次 * 100"
+
+benchmarks:
+  客单价:
+    economy: 200
+    mid: 500
+    premium: 1200
+  配件毛利率:
+    excellent: 40
+    good: 30
+    average: 20
+    poor: 12
+  工位利用率:
+    excellent: 85
+    good: 70
+    average: 55
+    poor: 35
+  返修率:
+    excellent: 1
+    good: 3
+    average: 5
+    poor: 8
+  客户留存率:
+    excellent: 65
+    good: 50
+    average: 35
+    poor: 20
+
+red_flags:
+  - metric: 返修率
+    threshold: "> 8"
+    severity: critical
+    description: "返修率过高说明维修质量或配件质量有严重问题"
+  - metric: 客户留存率
+    threshold: "< 20"
+    severity: high
+    description: "留存率低意味着客户体验差或被竞品抢走"
+  - metric: 工位利用率
+    threshold: "< 35"
+    severity: medium
+    description: "工位利用率低造成固定成本浪费"
+
+competitor_focus:
+  - "周边3km同类型汽服店"
+  - "同品牌4S店/授权店"
+  - "线上平台价格对比"
+  - "新开业汽服店"
+  - "竞品客户口碑变化"
+
+marketing_scenarios:
+  - name: "保养套餐"
+    icon: "🔧"
+    desc: "保养套餐推广方案"
+  - name: "换季检查"
+    icon: "❄️"
+    desc: "季节性安全检测活动"
+  - name: "新客优惠"
+    icon: "🎁"
+    desc: "首次到店优惠方案"
+  - name: "老客户关怀"
+    icon: "💝"
+    desc: "保养到期提醒和优惠"
+  - name: "朋友圈案例"
+    icon: "📱"
+    desc: "维修前后对比案例分享"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行分析诊断。所有指标需与行业基准对比。
+
+    ## 行业基准
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请基于因果框架分析根因，追溯到维修质量/技师/配件/定价维度。
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "小保养多少钱？"
+  - "需要预约吗？大概要多久？"
+  - "用的什么机油/配件？"
+  - "可以自带配件吗？"
+  - "有什么优惠套餐？"
+  - "支持保险理赔吗？"

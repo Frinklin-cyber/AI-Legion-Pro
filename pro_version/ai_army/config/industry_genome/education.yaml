@@ -1,0 +1,274 @@
+# 教育培训行业基因库
+id: education
+name: 教育培训
+icon: "📚"
+description: "培训机构、兴趣班、辅导班、驾校、艺术培训等"
+subcategories:
+  - K12学科辅导
+  - 艺术培训
+  - 体育培训
+  - 语言培训
+  - IT编程培训
+  - 驾校
+  - 早教托育
+  - 考研/公考
+  - 职业技能
+  - 留学咨询
+
+default_search_radius: 3000
+
+amap_poi_type: "141200"
+tencent_poi_type: "教育机构"
+
+kpi_formulas:
+  在读学员数:
+    formula: "当前在册学员总数"
+    description: "目前一共有多少在读学员"
+    unit: 人
+    importance: critical
+    is_raw: true
+  试听转化率:
+    formula: "试听后报名数 / 试听总数 * 100"
+    description: "10个来试听的，有多少个报名了"
+    unit: "%"
+    importance: critical
+    raw_inputs:
+      - key: 试听总数
+        question: "最近有多少人来试听了？"
+        placeholder: "比如：50"
+        unit: 人
+      - key: 试听后报名
+        question: "其中多少人报名了？"
+        placeholder: "比如：15"
+        unit: 人
+    compute_expr: "试听后报名 / 试听总数 * 100"
+  续费率:
+    formula: "到期续报学员数 / 到期学员总数 * 100"
+    description: "学员到期后，有多少比例续报了"
+    unit: "%"
+    importance: critical
+    raw_inputs:
+      - key: 到期学员数
+        question: "最近有多少学员到期了？"
+        placeholder: "比如：100"
+        unit: 人
+      - key: 续报学员数
+        question: "其中多少人续报下一期了？"
+        placeholder: "比如：65"
+        unit: 人
+    compute_expr: "续报学员数 / 到期学员数 * 100"
+  客单价:
+    formula: "总营收 / 付费学员数"
+    description: "每个学员平均交多少钱"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 总营收
+        question: "这段时间总共收了多少钱？"
+        placeholder: "比如：100000"
+        unit: 元
+      - key: 付费学员数
+        question: "一共有多少学员交费了？"
+        placeholder: "比如：100"
+        unit: 人
+    compute_expr: "总营收 / 付费学员数"
+  获客成本:
+    formula: "营销总支出 / 新获学员数"
+    description: "花多少钱才能招来一个新学员"
+    unit: 元/人
+    importance: high
+    raw_inputs:
+      - key: 营销支出
+        question: "这段时间推广、广告一共花了多少钱？"
+        placeholder: "比如：10000"
+        unit: 元
+      - key: 新获学员数
+        question: "这段时间招了多少新学员？"
+        placeholder: "比如：50"
+        unit: 人
+    compute_expr: "营销支出 / 新获学员数"
+  完课率:
+    formula: "完整完成课程的学员 / 报名学员 * 100"
+    description: "10个报名的学员里，有多少个坚持学完了"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 报名学员数
+        question: "这期一共报名了多少学员？"
+        placeholder: "比如：80"
+        unit: 人
+      - key: 完课学员数
+        question: "其中坚持学完的有多少？"
+        placeholder: "比如：64"
+        unit: 人
+    compute_expr: "完课学员数 / 报名学员数 * 100"
+  转介绍率:
+    formula: "老学员推荐新学员数 / 总新学员数 * 100"
+    description: "新学员里有多少是老学员介绍的"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 总新学员数
+        question: "最近招了多少新学员？"
+        placeholder: "比如：50"
+        unit: 人
+      - key: 老学员介绍数
+        question: "其中多少是老学员介绍来的？"
+        placeholder: "比如：15"
+        unit: 人
+    compute_expr: "老学员介绍数 / 总新学员数 * 100"
+  退费率:
+    formula: "退费学员数 / 总学员数 * 100"
+    description: "100个学员里有多少个退费了"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 总学员数
+        question: "目前一共有多少学员？"
+        placeholder: "比如：200"
+        unit: 人
+      - key: 退费学员数
+        question: "最近有多少学员退费了？"
+        placeholder: "比如：10"
+        unit: 人
+    compute_expr: "退费学员数 / 总学员数 * 100"
+  满班率:
+    formula: "实际学员数 / 班级容量 * 100"
+    description: "班级平均坐满多少人"
+    unit: "%"
+    importance: medium
+    is_raw: true
+  师资留存率:
+    formula: "年末在职教师 / 年初教师总数 * 100"
+    description: "一年下来，有多少老师留下来了"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 年初教师数
+        question: "年初有多少位老师？"
+        placeholder: "比如：20"
+        unit: 人
+      - key: 当前教师数
+        question: "现在还剩多少位老师？"
+        placeholder: "比如：16"
+        unit: 人
+    compute_expr: "当前教师数 / 年初教师数 * 100"
+
+benchmarks:
+  试听转化率:
+    excellent: 45
+    good: 30
+    average: 20
+    poor: 10
+  续费率:
+    excellent: 80
+    good: 65
+    average: 50
+    poor: 30
+  获客成本:
+    excellent: 100
+    good: 300
+    average: 500
+    poor: 800
+  退费率:
+    excellent: 2
+    good: 5
+    average: 10
+    poor: 15
+  完课率:
+    excellent: 90
+    good: 80
+    average: 65
+    poor: 50
+
+red_flags:
+  - metric: 试听转化率
+    threshold: "< 10"
+    severity: critical
+    description: "试听转化率过低，说明试听课质量或销售流程存在严重问题"
+  - metric: 退费率
+    threshold: "> 15"
+    severity: critical
+    description: "退费率超过15%反映教学质量或预期管理出现严重问题"
+  - metric: 续费率
+    threshold: "< 30"
+    severity: critical
+    description: "续费率低意味着品牌信任崩塌，LTV严重缩水"
+  - metric: 完课率
+    threshold: "< 50"
+    severity: high
+    description: "完课率低说明课程吸引力或服务体系不足"
+  - metric: 获客成本
+    threshold: "> 800"
+    severity: high
+    description: "获客成本过高将导致商业模式不可持续"
+
+competitor_focus:
+  - "周边3km培训机构"
+  - "同类课程定价对比"
+  - "竞品招生策略与促销"
+  - "新开培训机构"
+  - "家长/学员评价与口碑"
+  - "竞品课程更新与师资变动"
+
+marketing_scenarios:
+  - name: "试听邀约"
+    icon: "📞"
+    desc: "试听课邀请话术+海报"
+  - name: "学习成果展示"
+    icon: "🏆"
+    desc: "学员进步案例+效果图"
+  - name: "招生简章"
+    icon: "📋"
+    desc: "课程招生宣传内容"
+  - name: "名师推荐"
+    icon: "🎓"
+    desc: "师资力量包装文案"
+  - name: "限时优惠"
+    icon: "⏰"
+    desc: "报名优惠活动方案"
+  - name: "老带新裂变"
+    icon: "🔗"
+    desc: "转介绍激励方案"
+  - name: "升学喜报"
+    icon: "🎊"
+    desc: "学员升学/获奖成果传播"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行诊断分析：
+
+    ## 行业基准（{store_type}）
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+    ## 分析规则
+    1. 重点关注试听转化率、续费率、退费率三大生命线指标
+    2. 归因到具体课程/班级/教师
+    3. LTV/CAC比值的健康度评估
+    4. 建议必须可量化
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请对以下教培经营数据进行因果归因分析：
+
+    ## 分析框架
+    1. **现象识别**：哪些指标出现异常？
+    2. **因果链**：师资质量→完课率→续费率→转介绍→获客成本的完整链条
+    3. **根因定位**：追溯到课程/教师/销售环节
+    4. **影响量化**：估算LTV和CAC的健康度
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "有什么课程？适合多大年龄？"
+  - "一节课多长时间？"
+  - "老师什么资质？"
+  - "可以试听吗？"
+  - "学费多少？有优惠吗？"
+  - "不合适可以退吗？"
+  - "上课时间怎么安排？"

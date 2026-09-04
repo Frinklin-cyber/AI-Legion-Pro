@@ -1,0 +1,180 @@
+# 房产中介行业基因库
+id: real_estate
+name: 房产中介
+icon: "🏠"
+description: "房屋买卖、租赁、商铺招商、装修等"
+subcategories:
+  - 二手房买卖
+  - 新房代理
+  - 租赁中介
+  - 商业地产/商铺
+  - 物业管理
+  - 装修公司
+
+default_search_radius: 2000
+
+amap_poi_type: "120000"
+tencent_poi_type: "房产小区"
+
+kpi_formulas:
+  月度成交套数:
+    formula: "月度房屋成交总套数"
+    description: "这个月一共成交了多少套房子"
+    unit: 套
+    importance: critical
+    is_raw: true
+  佣金收入:
+    formula: "月度总佣金收入"
+    description: "这个月佣金总共收了多少钱"
+    unit: 元
+    importance: critical
+    is_raw: true
+  库存在售租房源:
+    formula: "在售在租房源总量"
+    description: "目前手里有多少套在售/在租房源"
+    unit: 套
+    importance: high
+    is_raw: true
+  带看量:
+    formula: "月度总带看次数"
+    description: "这个月一共带客户看了多少次房"
+    unit: 次
+    importance: high
+    is_raw: true
+  带看转化率:
+    formula: "成交套数 / 带看次数 * 100"
+    description: "10次带看里，有多少次成交了"
+    unit: "%"
+    importance: critical
+    raw_inputs:
+      - key: 成交套数
+        question: "这个月一共成交了多少套？"
+        placeholder: "比如：8"
+        unit: 套
+      - key: 带看次数
+        question: "这个月一共带客户看了多少次房？"
+        placeholder: "比如：80"
+        unit: 次
+    compute_expr: "成交套数 / 带看次数 * 100"
+  独家房源占比:
+    formula: "独家代理房源 / 总房源 * 100"
+    description: "独家房源占总房源的比例"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 独家房源数
+        question: "手里有多少套独家代理房源？"
+        placeholder: "比如：15"
+        unit: 套
+      - key: 总房源数
+        question: "目前手里一共有多少套在售/在租房源？"
+        placeholder: "比如：100"
+        unit: 套
+    compute_expr: "独家房源数 / 总房源数 * 100"
+  经纪人效:
+    formula: "总佣金 / 经纪人总数"
+    description: "每个经纪人平均做多少业绩"
+    unit: 元/人
+    importance: high
+    raw_inputs:
+      - key: 经纪人总数
+        question: "一共有多少个经纪人？"
+        placeholder: "比如：10"
+        unit: 人
+    compute_expr: "佣金收入 / 经纪人总数"
+  平均成交周期:
+    formula: "sum(成交天数) / 成交套数"
+    description: "从挂牌到成交平均需要多少天"
+    unit: 天
+    importance: medium
+    is_raw: true
+
+benchmarks:
+  带看转化率:
+    excellent: 15
+    good: 10
+    average: 6
+    poor: 3
+  独家房源占比:
+    excellent: 30
+    good: 20
+    average: 10
+    poor: 5
+  经纪人效:
+    excellent: 30000
+    good: 15000
+    average: 8000
+    poor: 4000
+  平均成交周期:
+    excellent: 15
+    good: 30
+    average: 45
+    poor: 60
+
+red_flags:
+  - metric: 带看转化率
+    threshold: "< 3"
+    severity: critical
+    description: "转化率极低说明房源匹配或经纪人谈判能力严重不足"
+  - metric: 独家房源占比
+    threshold: "< 5"
+    severity: high
+    description: "缺乏独家房源意味着没有竞争优势，只能被动比价"
+  - metric: 经纪人效
+    threshold: "< 4000"
+    severity: high
+    description: "经纪人效太低，可能存在人员冗余或效率问题"
+
+competitor_focus:
+  - "周边2km中介门店"
+  - "线上平台房源对比"
+  - "佣金费率变化"
+  - "新开门店"
+  - "区域成交数据变化"
+  - "竞品独家房源动态"
+
+marketing_scenarios:
+  - name: "优质房源"
+    icon: "🏡"
+    desc: "精品房源推荐文案"
+  - name: "购房攻略"
+    icon: "📖"
+    desc: "买房避坑指南内容"
+  - name: "成交案例"
+    icon: "✅"
+    desc: "已成交案例分享"
+  - name: "市场分析"
+    icon: "📊"
+    desc: "区域房价走势分析"
+  - name: "朋友圈种草"
+    icon: "📱"
+    desc: "朋友圈房源文案"
+  - name: "业主委托"
+    icon: "🤝"
+    desc: "诚接房源委托宣传"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行分析诊断。所有指标需与行业基准对比。
+
+    ## 行业基准
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请基于因果框架分析根因。
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "中介费怎么收？"
+  - "这个小区均价多少？"
+  - "能帮办贷款吗？"
+  - "什么时候能看房？"
+  - "过户大概要多久？"
+  - "你们和链家/贝壳有什么区别？"

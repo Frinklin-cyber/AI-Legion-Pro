@@ -1,0 +1,94 @@
+{
+  "name": "AI军团 - 每日情报简报工作流",
+  "nodes": [
+    {
+      "name": "定时触发",
+      "type": "n8n-nodes-base.cron",
+      "position": [250, 300],
+      "parameters": {
+        "triggerTimes": {
+          "item": [{"hour": 8, "minute": 0}]
+        }
+      }
+    },
+    {
+      "name": "爬取新闻",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [450, 300],
+      "parameters": {
+        "url": "http://command-center:8000/api/briefing/generate",
+        "method": "POST",
+        "authentication": "none",
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "name": "格式化简报",
+      "type": "n8n-nodes-base.function",
+      "position": [650, 300],
+      "parameters": {
+        "functionCode": "const data = $input.first().json;\nreturn {\n  markdown: `# 📰 每日情报简报\\n\\n${data.briefing || '今日暂无重大情报'}\\n\\n> 情报获取: ${data.item_count || 0}条 | Token: ${data.tokens_used || 0}`\n};"
+      }
+    },
+    {
+      "name": "推送到企业微信",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [850, 200],
+      "parameters": {
+        "url": "={{$env.WECOM_WEBHOOK_URL}}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {"name": "msgtype", "value": "markdown"},
+            {"name": "content", "value": "={{$json.markdown}}"}
+          ]
+        }
+      }
+    },
+    {
+      "name": "保存本地",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "position": [850, 400],
+      "parameters": {
+        "fileName": "=/data/briefings/briefing_{{ $now.format('YYYYMMDD') }}.md",
+        "dataPropertyName": "data"
+      }
+    },
+    {
+      "name": "异常通知",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [650, 500],
+      "parameters": {
+        "url": "={{$env.WECOM_WEBHOOK_URL}}",
+        "method": "POST",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "msgtype", "value": "text"},
+            {"name": "content", "value": "⚠️ AI军团情报简报生成失败，请检查！"}
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "定时触发": {"main": [[{"node": "爬取新闻", "type": "main", "index": 0}]]},
+    "爬取新闻": {
+      "main": [[{"node": "格式化简报", "type": "main", "index": 0}]],
+      "error": [[{"node": "异常通知", "type": "main", "index": 0}]]
+    },
+    "格式化简报": {
+      "main": [
+        [{"node": "推送到企业微信", "type": "main", "index": 0}],
+        [{"node": "保存本地", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "timezone": "Asia/Shanghai"
+  }
+}

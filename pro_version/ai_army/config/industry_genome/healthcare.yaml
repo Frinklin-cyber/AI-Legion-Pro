@@ -1,0 +1,214 @@
+# 医疗健康行业基因库
+id: healthcare
+name: 医疗健康
+icon: "🏥"
+description: "诊所、口腔、眼科、中医、康复、体检等"
+subcategories:
+  - 口腔诊所
+  - 眼科诊所
+  - 中医馆/理疗
+  - 体检中心
+  - 康复中心
+  - 医疗美容
+  - 社区诊所
+  - 心理咨询
+
+default_search_radius: 3000
+
+amap_poi_type: "090000"
+tencent_poi_type: "医疗保健"
+
+kpi_formulas:
+  日营收:
+    formula: "sum(当日所有诊疗收入)"
+    description: "今天一天总共收了多少钱"
+    unit: 元
+    importance: critical
+    is_raw: true
+  日均就诊人次:
+    formula: "月度就诊人次 / 营业天数"
+    description: "平均每天接待多少患者"
+    unit: 人
+    importance: high
+    raw_inputs:
+      - key: 月就诊人次
+        question: "这个月一共接待了多少患者？"
+        placeholder: "比如：600"
+        unit: 人次
+      - key: 营业天数
+        question: "这个月营业了多少天？"
+        placeholder: "比如：26"
+        unit: 天
+    compute_expr: "月就诊人次 / 营业天数"
+  客单价:
+    formula: "日营收 / 就诊人次"
+    description: "每个患者平均消费多少钱"
+    unit: 元
+    importance: high
+    raw_inputs:
+      - key: 就诊人次
+        question: "今天一共接待了多少患者？"
+        placeholder: "比如：25"
+        unit: 人
+    compute_expr: "日营收 / 就诊人次"
+  预约到诊率:
+    formula: "实际到诊预约 / 总预约 * 100"
+    description: "10个预约里，有多少个来了"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 总预约数
+        question: "今天一共有多少预约？"
+        placeholder: "比如：30"
+        unit: 个
+      - key: 实际到诊数
+        question: "实际来了多少个？"
+        placeholder: "比如：24"
+        unit: 个
+    compute_expr: "实际到诊数 / 总预约数 * 100"
+  复诊率:
+    formula: "复诊患者 / 总患者数 * 100"
+    description: "10个患者里有多少个回来复诊"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 总患者数
+        question: "这段时间一共看了多少患者？"
+        placeholder: "比如：100"
+        unit: 人
+      - key: 复诊患者数
+        question: "其中有多少是复诊的老患者？"
+        placeholder: "比如：40"
+        unit: 人
+    compute_expr: "复诊患者数 / 总患者数 * 100"
+  转介绍率:
+    formula: "老患者推荐新患者 / 总新患者 * 100"
+    description: "新患者里有多少是老客介绍的"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 总新患者数
+        question: "最近来了多少新患者？"
+        placeholder: "比如：50"
+        unit: 人
+      - key: 老客介绍数
+        question: "其中多少是老患者介绍来的？"
+        placeholder: "比如：10"
+        unit: 人
+    compute_expr: "老客介绍数 / 总新患者数 * 100"
+  好评率:
+    formula: "患者满意度评分（好评数/总评价）"
+    description: "10个患者里有多少个给好评"
+    unit: "%"
+    importance: high
+    raw_inputs:
+      - key: 好评数
+        question: "收到多少条好评？"
+        placeholder: "比如：45"
+        unit: 条
+      - key: 总评价数
+        question: "总共收到多少条评价？"
+        placeholder: "比如：50"
+        unit: 条
+    compute_expr: "好评数 / 总评价数 * 100"
+  候诊时长:
+    formula: "从挂号到就诊的平均等待分钟数"
+    description: "从挂号到看病平均要等多久"
+    unit: 分钟
+    importance: medium
+    is_raw: true
+
+benchmarks:
+  预约到诊率:
+    excellent: 90
+    good: 80
+    average: 65
+    poor: 50
+  复诊率:
+    excellent: 60
+    good: 45
+    average: 30
+    poor: 15
+  转介绍率:
+    excellent: 40
+    good: 25
+    average: 12
+    poor: 5
+  好评率:
+    excellent: 95
+    good: 88
+    average: 80
+    poor: 70
+  候诊时长:
+    excellent: 5
+    good: 10
+    average: 20
+    poor: 30
+
+red_flags:
+  - metric: 复诊率
+    threshold: "< 15"
+    severity: critical
+    description: "复诊率极低说明诊疗效果或患者信任度严重不足"
+  - metric: 转介绍率
+    threshold: "< 5"
+    severity: high
+    description: "转介绍率低说明患者满意度不足，口碑传播失效"
+  - metric: 候诊时长
+    threshold: "> 30"
+    severity: high
+    description: "候诊时间过长会严重影响患者体验和口碑"
+
+competitor_focus:
+  - "周边3km同类型医疗机构"
+  - "线上平台评分对比"
+  - "竞品定价与套餐变化"
+  - "新开业医疗机构"
+  - "患者口碑变化趋势"
+  - "竞品专家/设备优势"
+
+marketing_scenarios:
+  - name: "健康科普"
+    icon: "📚"
+    desc: "疾病预防/保健知识科普"
+  - name: "专家介绍"
+    icon: "👨‍⚕️"
+    desc: "医生资质与案例展示"
+  - name: "新客体验"
+    icon: "🎁"
+    desc: "首次就诊优惠活动"
+  - name: "会员权益"
+    icon: "👑"
+    desc: "健康管理会员方案"
+  - name: "患者案例"
+    icon: "📸"
+    desc: "治疗效果展示（脱敏处理）"
+  - name: "节日关怀"
+    icon: "💝"
+    desc: "节假日健康关怀活动"
+
+prompt_templates:
+  analysis: |
+    你是{store_type}行业的资深经营顾问。
+    请基于以下经营数据进行分析诊断。所有指标需与行业基准对比。
+
+    ## 行业基准
+    {benchmarks_context}
+
+    ## 红线预警
+    {red_flags_context}
+
+  attribution: |
+    你是{store_type}行业的归因分析专家。
+    请基于因果框架分析根因，追溯到医生/项目/服务流程/预约管理维度。
+
+    ## 行业基准参照
+    {benchmarks_context}
+
+faq_templates:
+  - "可以医保报销吗？"
+  - "需要提前预约吗？"
+  - "做一次大概多少钱？"
+  - "营业时间是？周末开吗？"
+  - "治疗过程疼吗？"
+  - "需要多长时间恢复？"
